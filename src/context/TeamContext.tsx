@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { TeamMember, TeamMembers } from '../types';
 import { demoTeamData, getTeamHierarchy } from '../data/team';
-import { toast } from '@/components/ui/sonner';
+import { toast } from '@/hooks/use-toast';
 
 interface TeamContextProps {
   teamMembers: TeamMembers;

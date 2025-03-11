@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTeam } from '@/context/TeamContext';
 import { TeamMember } from '@/types';
-import { toast } from '@/components/ui/sonner';
+import { toast } from '@/hooks/use-toast';
 import { X } from 'lucide-react';
 
 interface MemberFormProps {
