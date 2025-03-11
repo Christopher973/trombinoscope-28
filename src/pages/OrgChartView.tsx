@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useTeam } from '@/context/TeamContext';
 import OrgChart from '@/components/ui/OrgChart';
 import { GitBranchPlus, Filter } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const OrgChartView: React.FC = () => {
   const { teamMembers } = useTeam();
@@ -49,6 +50,29 @@ const OrgChartView: React.FC = () => {
               </svg>
             </div>
           </div>
+        </div>
+        
+        <div className="mt-4 flex flex-wrap gap-2">
+          <Button
+            variant={selectedDepartment === "" ? "default" : "outline"}
+            size="sm"
+            onClick={() => setSelectedDepartment("")}
+            className="text-xs"
+          >
+            All
+          </Button>
+          
+          {departments.map(department => (
+            <Button
+              key={department}
+              variant={selectedDepartment === department ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSelectedDepartment(department)}
+              className="text-xs"
+            >
+              {department}
+            </Button>
+          ))}
         </div>
       </div>
       
