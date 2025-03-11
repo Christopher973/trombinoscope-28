@@ -10,7 +10,8 @@ interface OrgChartNodeProps {
 }
 
 interface OrgChartProps {
-  selectedDepartment?: string;
+  selectedDepartments: string[];
+  zoomLevel: number;
 }
 
 const OrgChartNode: React.FC<OrgChartNodeProps> = ({ node, isRoot = false }) => {
@@ -43,37 +44,37 @@ const OrgChartNode: React.FC<OrgChartNodeProps> = ({ node, isRoot = false }) => 
   );
 };
 
-const OrgChart: React.FC<OrgChartProps> = ({ selectedDepartment = '' }) => {
+const OrgChart: React.FC<OrgChartProps> = ({ selectedDepartments = [], zoomLevel = 1 }) => {
   const { teamMembers } = useTeam();
   const containerRef = useRef<HTMLDivElement>(null);
   
-  // Filter team members by department if a department is selected
+  // Filter team members by departments if departments are selected
   const filteredTeamMembers = useMemo(() => {
-    if (!selectedDepartment) return teamMembers;
-    return teamMembers.filter(member => member.department === selectedDepartment);
-  }, [teamMembers, selectedDepartment]);
+    if (selectedDepartments.length === 0) return teamMembers;
+    return teamMembers.filter(member => selectedDepartments.includes(member.department));
+  }, [teamMembers, selectedDepartments]);
   
   // Build hierarchy from filtered members
   const filteredHierarchy = useMemo(() => {
-    if (!selectedDepartment) {
+    if (selectedDepartments.length === 0) {
       // If no department filter, use the standard team hierarchy
       return getTeamHierarchy(teamMembers);
     }
     
-    // Find the highest-level members of the selected department
+    // Find the highest-level members of the selected departments
     const departmentMembers = filteredTeamMembers;
     
     // Find members whose managers are not in the filtered set
     // These will be our "roots" for the filtered hierarchy
     const rootMembers = departmentMembers.filter(member => {
       if (!member.managerId) return true;
-      const managerInDepartment = departmentMembers.some(m => m.id === member.managerId);
-      return !managerInDepartment;
+      const managerInFilteredSet = departmentMembers.some(m => m.id === member.managerId);
+      return !managerInFilteredSet;
     });
     
     // Build trees for each root member
     return rootMembers.map(rootMember => buildMemberTree(rootMember, departmentMembers));
-  }, [filteredTeamMembers, selectedDepartment, teamMembers]);
+  }, [filteredTeamMembers, selectedDepartments, teamMembers]);
   
   // Helper function to build a tree for a member
   function buildMemberTree(member: TeamMember, members: TeamMember[]) {
@@ -94,9 +95,10 @@ const OrgChart: React.FC<OrgChartProps> = ({ selectedDepartment = '' }) => {
     }));
   }
   
-  // When the chart renders, center it horizontally
+  // When the chart renders or zoom changes, ensure the container is set up properly
   useEffect(() => {
     if (containerRef.current) {
+      // Center the chart horizontally
       const containerWidth = containerRef.current.scrollWidth;
       const viewportWidth = containerRef.current.clientWidth;
       
@@ -105,13 +107,13 @@ const OrgChart: React.FC<OrgChartProps> = ({ selectedDepartment = '' }) => {
         containerRef.current.scrollLeft = scrollTo;
       }
     }
-  }, [filteredHierarchy]);
+  }, [filteredHierarchy, zoomLevel]);
   
   if (filteredHierarchy.length === 0) {
     return (
       <div className="text-center py-10">
-        {selectedDepartment 
-          ? `No team members found in the ${selectedDepartment} department.`
+        {selectedDepartments.length > 0 
+          ? `No team members found in the selected department(s).`
           : 'Loading organization chart...'}
       </div>
     );
@@ -120,10 +122,19 @@ const OrgChart: React.FC<OrgChartProps> = ({ selectedDepartment = '' }) => {
   return (
     <div 
       ref={containerRef}
-      className="w-full overflow-x-auto pb-12"
-      style={{ minHeight: '500px' }}
+      className="org-chart-container w-full overflow-x-auto overflow-y-auto pb-12 relative"
+      style={{ 
+        minHeight: '500px',
+        maxHeight: '70vh'
+      }}
     >
-      <div className="pt-10 pb-20 min-w-max">
+      <div 
+        className="pt-10 pb-20 min-w-max transition-transform duration-300"
+        style={{ 
+          transform: `scale(${zoomLevel})`,
+          transformOrigin: 'top center'
+        }}
+      >
         {filteredHierarchy.map((rootNode, index) => (
           <div key={rootNode.id || index} className="mb-16 last:mb-0">
             <OrgChartNode node={rootNode} isRoot />
