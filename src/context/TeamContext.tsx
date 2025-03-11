@@ -37,7 +37,10 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const newMember = { id, ...memberData };
     
     setTeamMembers(prev => [...prev, newMember]);
-    toast.success('Team member added successfully');
+    toast({
+      title: "Success",
+      description: "Team member added successfully",
+    });
   };
 
   // Update an existing team member
@@ -47,7 +50,10 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({ children
         member.id === updatedMember.id ? updatedMember : member
       )
     );
-    toast.success('Team member updated successfully');
+    toast({
+      title: "Success",
+      description: "Team member updated successfully",
+    });
   };
 
   // Delete a team member
@@ -70,7 +76,10 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return updatedTeam.filter(member => member.id !== id);
     });
     
-    toast.success('Team member deleted successfully');
+    toast({
+      title: "Success",
+      description: "Team member deleted successfully",
+    });
   };
 
   // Get a specific team member by ID

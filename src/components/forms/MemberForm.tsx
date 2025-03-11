@@ -91,7 +91,11 @@ const MemberForm: React.FC<MemberFormProps> = ({
         onSuccess();
       }
     } catch (error) {
-      toast.error('Failed to save team member');
+      toast({
+        title: "Error",
+        description: "Failed to save team member",
+        variant: "destructive",
+      });
       console.error(error);
     }
   };
