@@ -37,21 +37,21 @@ const ThemeDropdown: React.FC = () => {
       <DropdownMenuContent align="end" className="w-40">
         <DropdownMenuItem 
           onClick={() => setTheme('default')}
-          className={theme === 'default' ? 'bg-primary/10 text-primary' : ''}
+          className={theme === 'default' ? 'bg-primary/10 text-primary font-medium' : ''}
         >
           <Monitor className="h-4 w-4 mr-2" />
           {t('defaultTheme')}
         </DropdownMenuItem>
         <DropdownMenuItem 
           onClick={() => setTheme('light')}
-          className={theme === 'light' ? 'bg-primary/10 text-primary' : ''}
+          className={theme === 'light' ? 'bg-primary/10 text-primary font-medium' : ''}
         >
           <Sun className="h-4 w-4 mr-2" />
           {t('lightTheme')}
         </DropdownMenuItem>
         <DropdownMenuItem 
           onClick={() => setTheme('dark')}
-          className={theme === 'dark' ? 'bg-primary/10 text-primary' : ''}
+          className={theme === 'dark' ? 'bg-primary/10 text-primary font-medium' : ''}
         >
           <Moon className="h-4 w-4 mr-2" />
           {t('darkTheme')}

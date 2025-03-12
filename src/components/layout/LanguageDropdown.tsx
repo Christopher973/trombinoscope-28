@@ -24,13 +24,13 @@ const LanguageDropdown: React.FC = () => {
       <DropdownMenuContent align="end" className="w-40">
         <DropdownMenuItem 
           onClick={() => setLanguage('en')}
-          className={language === 'en' ? 'bg-primary/10 text-primary' : ''}
+          className={language === 'en' ? 'bg-primary/10 text-primary font-medium' : ''}
         >
           🇬🇧 {t('english')}
         </DropdownMenuItem>
         <DropdownMenuItem 
           onClick={() => setLanguage('fr')}
-          className={language === 'fr' ? 'bg-primary/10 text-primary' : ''}
+          className={language === 'fr' ? 'bg-primary/10 text-primary font-medium' : ''}
         >
           🇫🇷 {t('french')}
         </DropdownMenuItem>
