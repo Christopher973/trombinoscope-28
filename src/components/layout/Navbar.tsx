@@ -2,22 +2,18 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, User, Users, GitBranchPlus } from 'lucide-react';
-import { useLanguage } from '@/context/LanguageContext';
-import LanguageDropdown from './LanguageDropdown';
-import ThemeDropdown from './ThemeDropdown';
 
 const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
-  const { t } = useLanguage();
   
   const toggleMenu = () => setIsOpen(!isOpen);
   const closeMenu = () => setIsOpen(false);
   
   const navLinks = [
-    { title: t('home'), path: '/', icon: <Users className="h-5 w-5" /> },
-    { title: t('members'), path: '/members', icon: <User className="h-5 w-5" /> },
-    { title: t('orgChart'), path: '/org-chart', icon: <GitBranchPlus className="h-5 w-5" /> },
+    { title: 'Home', path: '/', icon: <Users className="h-5 w-5" /> },
+    { title: 'Members', path: '/members', icon: <User className="h-5 w-5" /> },
+    { title: 'Org Chart', path: '/org-chart', icon: <GitBranchPlus className="h-5 w-5" /> },
   ];
   
   return (
@@ -47,12 +43,6 @@ const Navbar: React.FC = () => {
               </Link>
             ))}
           </nav>
-          
-          {/* Theme and Language controls */}
-          <div className="hidden md:flex items-center space-x-2">
-            <LanguageDropdown />
-            <ThemeDropdown />
-          </div>
           
           {/* Mobile menu button */}
           <div className="md:hidden">
@@ -91,16 +81,6 @@ const Navbar: React.FC = () => {
                   <span>{link.title}</span>
                 </Link>
               ))}
-              
-              {/* Mobile theme and language controls */}
-              <div className="flex flex-col space-y-2 pt-2 border-t border-border/20">
-                <div className="px-3">
-                  <LanguageDropdown />
-                </div>
-                <div className="px-3">
-                  <ThemeDropdown />
-                </div>
-              </div>
             </nav>
           </div>
         </div>
