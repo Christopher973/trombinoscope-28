@@ -12,6 +12,7 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
+    "prisma:seed": "node prisma/seed.js",
     "server:build": "cd server && node --loader ts-node/esm build.ts",
     "server:start": "cd server/dist && node index.js",
     "server:dev": "cd server && ts-node --esm build.ts && cd dist && node index.js"
