@@ -6,12 +6,24 @@ import MemberCard from '@/components/ui/MemberCard';
 import { PlusCircle, Search, Filter, Upload } from 'lucide-react';
 import CSVImportDialog from '@/components/ui/CSVImportDialog';
 import { Button } from '@/components/ui/button';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 const Members: React.FC = () => {
   const { teamMembers } = useTeam();
   const [searchTerm, setSearchTerm] = useState('');
   const [departmentFilter, setDepartmentFilter] = useState('');
   const [filteredMembers, setFilteredMembers] = useState(teamMembers);
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const membersPerPage = 8; // Number of members per page
   
   // Get unique departments for filter
   const departments = [...new Set(
@@ -34,7 +46,114 @@ const Members: React.FC = () => {
     });
     
     setFilteredMembers(filtered);
+    setCurrentPage(1); // Reset to first page when filters change
   }, [teamMembers, searchTerm, departmentFilter]);
+  
+  // Calculate pagination
+  const indexOfLastMember = currentPage * membersPerPage;
+  const indexOfFirstMember = indexOfLastMember - membersPerPage;
+  const currentMembers = filteredMembers.slice(indexOfFirstMember, indexOfLastMember);
+  const totalPages = Math.ceil(filteredMembers.length / membersPerPage);
+  
+  // Change page
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+  
+  // Generate page numbers to display
+  const pageNumbers = [];
+  for (let i = 1; i <= totalPages; i++) {
+    pageNumbers.push(i);
+  }
+
+  // Function to create pagination items with limited display for large page counts
+  const getPaginationItems = () => {
+    const items = [];
+    const maxPagesToShow = 5;
+    
+    if (totalPages <= maxPagesToShow) {
+      // If we have fewer pages than maxPagesToShow, show all pages
+      for (let i = 1; i <= totalPages; i++) {
+        items.push(
+          <PaginationItem key={i}>
+            <PaginationLink 
+              isActive={currentPage === i} 
+              onClick={() => paginate(i)}
+            >
+              {i}
+            </PaginationLink>
+          </PaginationItem>
+        );
+      }
+    } else {
+      // Always show first page
+      items.push(
+        <PaginationItem key={1}>
+          <PaginationLink 
+            isActive={currentPage === 1} 
+            onClick={() => paginate(1)}
+          >
+            1
+          </PaginationLink>
+        </PaginationItem>
+      );
+      
+      // Calculate range of pages to show around current page
+      let startPage = Math.max(2, currentPage - 1);
+      let endPage = Math.min(totalPages - 1, currentPage + 1);
+      
+      // Adjust if at beginning or end
+      if (currentPage <= 2) {
+        endPage = Math.min(4, totalPages - 1);
+      } else if (currentPage >= totalPages - 1) {
+        startPage = Math.max(totalPages - 3, 2);
+      }
+      
+      // Add ellipsis after first page if needed
+      if (startPage > 2) {
+        items.push(
+          <PaginationItem key="start-ellipsis">
+            <PaginationEllipsis />
+          </PaginationItem>
+        );
+      }
+      
+      // Add middle pages
+      for (let i = startPage; i <= endPage; i++) {
+        items.push(
+          <PaginationItem key={i}>
+            <PaginationLink 
+              isActive={currentPage === i} 
+              onClick={() => paginate(i)}
+            >
+              {i}
+            </PaginationLink>
+          </PaginationItem>
+        );
+      }
+      
+      // Add ellipsis before last page if needed
+      if (endPage < totalPages - 1) {
+        items.push(
+          <PaginationItem key="end-ellipsis">
+            <PaginationEllipsis />
+          </PaginationItem>
+        );
+      }
+      
+      // Always show last page
+      items.push(
+        <PaginationItem key={totalPages}>
+          <PaginationLink 
+            isActive={currentPage === totalPages} 
+            onClick={() => paginate(totalPages)}
+          >
+            {totalPages}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
+    
+    return items;
+  };
   
   return (
     <div className="page-container">
@@ -99,11 +218,42 @@ const Members: React.FC = () => {
           <p className="text-muted-foreground">No members found matching your search criteria.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {filteredMembers.map(member => (
-            <MemberCard key={member.id} member={member} />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-8">
+            {currentMembers.map(member => (
+              <MemberCard key={member.id} member={member} />
+            ))}
+          </div>
+          
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <Pagination className="my-6">
+              <PaginationContent>
+                {currentPage > 1 && (
+                  <PaginationItem>
+                    <PaginationPrevious 
+                      onClick={() => paginate(currentPage - 1)} 
+                    />
+                  </PaginationItem>
+                )}
+                
+                {getPaginationItems()}
+                
+                {currentPage < totalPages && (
+                  <PaginationItem>
+                    <PaginationNext 
+                      onClick={() => paginate(currentPage + 1)} 
+                    />
+                  </PaginationItem>
+                )}
+              </PaginationContent>
+            </Pagination>
+          )}
+          
+          <div className="text-center text-sm text-muted-foreground mt-2">
+            Showing {indexOfFirstMember + 1} to {Math.min(indexOfLastMember, filteredMembers.length)} of {filteredMembers.length} members
+          </div>
+        </>
       )}
     </div>
   );
