@@ -3,7 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTeam } from '@/context/TeamContext';
 import MemberCard from '@/components/ui/MemberCard';
-import { PlusCircle, Search, Filter } from 'lucide-react';
+import { PlusCircle, Search, Filter, Upload } from 'lucide-react';
+import CSVImportDialog from '@/components/ui/CSVImportDialog';
+import { Button } from '@/components/ui/button';
 
 const Members: React.FC = () => {
   const { teamMembers } = useTeam();
@@ -38,13 +40,22 @@ const Members: React.FC = () => {
     <div className="page-container">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <h1 className="text-2xl font-semibold">Team Members</h1>
-        <Link
-          to="/members/new"
-          className="inline-flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
-        >
-          <PlusCircle className="h-4 w-4 mr-2" />
-          Add New Member
-        </Link>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <CSVImportDialog>
+            <Button variant="outline" className="flex items-center gap-2">
+              <Upload className="h-4 w-4" />
+              Import CSV
+            </Button>
+          </CSVImportDialog>
+          
+          <Link
+            to="/members/new"
+            className="inline-flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
+          >
+            <PlusCircle className="h-4 w-4 mr-2" />
+            Add New Member
+          </Link>
+        </div>
       </div>
       
       <div className="bg-white rounded-lg shadow-sm border border-border/60 p-4 mb-8">
