@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { useTeam } from "@/context/TeamContext";
-import { TeamMember } from "@/types";
-import { toast } from "@/hooks/use-toast";
-import { X } from "lucide-react";
+
+import React, { useState, useEffect } from 'react';
+import { useTeam } from '@/context/TeamContext';
+import { TeamMember } from '@/types';
+import { toast } from '@/hooks/use-toast';
+import { X } from 'lucide-react';
 
 interface MemberFormProps {
   memberId?: string;
@@ -10,32 +11,31 @@ interface MemberFormProps {
   onCancel?: () => void;
 }
 
-const MemberForm: React.FC<MemberFormProps> = ({
+const MemberForm: React.FC<MemberFormProps> = ({ 
   memberId,
   onSuccess,
-  onCancel,
+  onCancel
 }) => {
-  const { teamMembers, addTeamMember, updateTeamMember, getTeamMember } =
-    useTeam();
-
-  const [formData, setFormData] = useState<Omit<TeamMember, "id">>({
-    firstName: "",
-    lastName: "",
-    email: "",
-    position: "",
-    department: "",
+  const { teamMembers, addTeamMember, updateTeamMember, getTeamMember } = useTeam();
+  
+  const [formData, setFormData] = useState<Omit<TeamMember, 'id'>>({
+    firstName: '',
+    lastName: '',
+    email: '',
+    position: '',
+    department: '',
     managerId: null,
-    imageUrl: "https://i.pravatar.cc/300",
-    bio: "",
-    startDate: "",
-    phoneNumber: "",
-    location: "",
-    skills: [],
+    imageUrl: 'https://i.pravatar.cc/300',
+    bio: '',
+    startDate: '',
+    phoneNumber: '',
+    location: '',
+    skills: []
   });
-
-  const [newSkill, setNewSkill] = useState("");
+  
+  const [newSkill, setNewSkill] = useState('');
   const isEditing = !!memberId;
-
+  
   // If editing, load the member data
   useEffect(() => {
     if (memberId) {
@@ -46,76 +46,70 @@ const MemberForm: React.FC<MemberFormProps> = ({
       }
     }
   }, [memberId, getTeamMember]);
-
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => {
+  
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
-
+  
   const handleManagerChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
-    setFormData((prev) => ({
-      ...prev,
-      managerId: value === "" ? null : value,
+    setFormData(prev => ({ 
+      ...prev, 
+      managerId: value === '' ? null : value 
     }));
   };
-
+  
   const addSkill = () => {
     if (newSkill.trim() && !formData.skills?.includes(newSkill.trim())) {
-      setFormData((prev) => ({
+      setFormData(prev => ({
         ...prev,
-        skills: [...(prev.skills || []), newSkill.trim()],
+        skills: [...(prev.skills || []), newSkill.trim()]
       }));
-      setNewSkill("");
+      setNewSkill('');
     }
   };
-
+  
   const removeSkill = (skillToRemove: string) => {
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
-      skills: prev.skills?.filter((skill) => skill !== skillToRemove) || [],
+      skills: prev.skills?.filter(skill => skill !== skillToRemove) || []
     }));
   };
-
+  
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
+    
     try {
       if (isEditing && memberId) {
         updateTeamMember({ id: memberId, ...formData });
       } else {
         addTeamMember(formData);
       }
-
+      
       if (onSuccess) {
         onSuccess();
       }
     } catch (error) {
       toast({
-        title: "Erreur",
-        description: "Impossible de sauvegarder le membre de l'équipe",
+        title: "Error",
+        description: "Failed to save team member",
         variant: "destructive",
       });
       console.error(error);
     }
   };
-
+  
   return (
     <div className="animate-fade-in">
       <h2 className="text-xl font-semibold mb-4">
-        {isEditing
-          ? "Modifier le membre de l'équipe"
-          : "Ajouter un nouveau membre de l'équipe"}
+        {isEditing ? 'Edit Team Member' : 'Add New Team Member'}
       </h2>
-
+      
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-1">Prénom</label>
+            <label className="block text-sm font-medium mb-1">First Name</label>
             <input
               type="text"
               name="firstName"
@@ -125,11 +119,9 @@ const MemberForm: React.FC<MemberFormProps> = ({
               required
             />
           </div>
-
+          
           <div>
-            <label className="block text-sm font-medium mb-1">
-              Nom de famille
-            </label>
+            <label className="block text-sm font-medium mb-1">Last Name</label>
             <input
               type="text"
               name="lastName"
@@ -139,7 +131,7 @@ const MemberForm: React.FC<MemberFormProps> = ({
               required
             />
           </div>
-
+          
           <div>
             <label className="block text-sm font-medium mb-1">Email</label>
             <input
@@ -151,20 +143,18 @@ const MemberForm: React.FC<MemberFormProps> = ({
               required
             />
           </div>
-
+          
           <div>
-            <label className="block text-sm font-medium mb-1">
-              Numéro de téléphone
-            </label>
+            <label className="block text-sm font-medium mb-1">Phone Number</label>
             <input
               type="text"
               name="phoneNumber"
-              value={formData.phoneNumber || ""}
+              value={formData.phoneNumber || ''}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
-
+          
           <div>
             <label className="block text-sm font-medium mb-1">Position</label>
             <input
@@ -176,11 +166,9 @@ const MemberForm: React.FC<MemberFormProps> = ({
               required
             />
           </div>
-
+          
           <div>
-            <label className="block text-sm font-medium mb-1">
-              Département
-            </label>
+            <label className="block text-sm font-medium mb-1">Department</label>
             <input
               type="text"
               name="department"
@@ -190,38 +178,32 @@ const MemberForm: React.FC<MemberFormProps> = ({
               required
             />
           </div>
-
+          
           <div>
-            <label className="block text-sm font-medium mb-1">
-              Emplacement
-            </label>
+            <label className="block text-sm font-medium mb-1">Location</label>
             <input
               type="text"
               name="location"
-              value={formData.location || ""}
+              value={formData.location || ''}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
-
+          
           <div>
-            <label className="block text-sm font-medium mb-1">
-              Date de début
-            </label>
+            <label className="block text-sm font-medium mb-1">Start Date</label>
             <input
               type="date"
               name="startDate"
-              value={formData.startDate || ""}
+              value={formData.startDate || ''}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
         </div>
-
+        
         <div>
-          <label className="block text-sm font-medium mb-1">
-            Profile Image URL
-          </label>
+          <label className="block text-sm font-medium mb-1">Profile Image URL</label>
           <input
             type="text"
             name="imageUrl"
@@ -231,63 +213,62 @@ const MemberForm: React.FC<MemberFormProps> = ({
             required
           />
         </div>
-
+        
         <div>
           <label className="block text-sm font-medium mb-1">Manager</label>
           <select
             name="managerId"
-            value={formData.managerId || ""}
+            value={formData.managerId || ''}
             onChange={handleManagerChange}
             className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
           >
-            <option value="">Pas de manager</option>
+            <option value="">No Manager (Top Level)</option>
             {teamMembers
-              .filter((m) => m.id !== memberId) // Can't be your own manager
-              .map((manager) => (
+              .filter(m => m.id !== memberId) // Can't be your own manager
+              .map(manager => (
                 <option key={manager.id} value={manager.id}>
                   {manager.firstName} {manager.lastName} - {manager.position}
                 </option>
-              ))}
+              ))
+            }
           </select>
         </div>
-
+        
         <div>
           <label className="block text-sm font-medium mb-1">Bio</label>
           <textarea
             name="bio"
-            value={formData.bio || ""}
+            value={formData.bio || ''}
             onChange={handleChange}
             rows={3}
             className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
-
+        
         <div>
-          <label className="block text-sm font-medium mb-1">Compétences</label>
+          <label className="block text-sm font-medium mb-1">Skills</label>
           <div className="flex space-x-2">
             <input
               type="text"
               value={newSkill}
               onChange={(e) => setNewSkill(e.target.value)}
               className="flex-1 px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
-              placeholder="Ajouter une compétence"
-              onKeyPress={(e) =>
-                e.key === "Enter" && (e.preventDefault(), addSkill())
-              }
+              placeholder="Add a skill"
+              onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSkill())}
             />
             <button
               type="button"
               onClick={addSkill}
               className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
             >
-              Ajouter
+              Add
             </button>
           </div>
-
+          
           <div className="mt-2 flex flex-wrap gap-2">
-            {formData.skills?.map((skill) => (
-              <span
-                key={skill}
+            {formData.skills?.map(skill => (
+              <span 
+                key={skill} 
                 className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary"
               >
                 {skill}
@@ -302,7 +283,7 @@ const MemberForm: React.FC<MemberFormProps> = ({
             ))}
           </div>
         </div>
-
+        
         <div className="flex justify-end space-x-2 pt-4">
           {onCancel && (
             <button
@@ -310,15 +291,15 @@ const MemberForm: React.FC<MemberFormProps> = ({
               onClick={onCancel}
               className="px-4 py-2 border border-border rounded-md hover:bg-secondary transition-colors"
             >
-              Annuler
+              Cancel
             </button>
           )}
-
+          
           <button
             type="submit"
             className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
           >
-            {isEditing ? "Mettre à jour le membre" : "Ajouter un membre"}
+            {isEditing ? 'Update Member' : 'Add Member'}
           </button>
         </div>
       </form>
