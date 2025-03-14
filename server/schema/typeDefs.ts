@@ -1,20 +1,23 @@
+
 import { gql } from "graphql-tag";
 
 export const typeDefs = gql`
   type Member {
-    id: ID!
-    firstName: String!
-    lastName: String!
-    email: String!
-    position: String!
-    department: Department
-    manager: Member
-    imageUrl: String
-    bio: String
+    id: Int!
+    firstname: String!
+    lastname: String!
+    gender: String
     startDate: String!
-    phoneNumber: String
-    directReports: [Member!]
+    birthday: String!
+    jobDescription: String!
+    managementCategory: String!
+    serviceAssignmentCode: String!
+    professionnalEmail: String!
+    imageUrl: String
+    department: Department
     location: Location
+    manager: Member
+    directReports: [Member!]
     createdAt: String!
     updatedAt: String!
   }
@@ -22,7 +25,6 @@ export const typeDefs = gql`
   type Department {
     id: Int!
     name: String!
-    description: String
     members: [Member!]!
     createdAt: String!
     updatedAt: String!
@@ -30,13 +32,13 @@ export const typeDefs = gql`
 
   type Location {
     id: Int!
-    title: String!
+    name: String!
     members: [Member!]!
   }
 
   type Query {
     members: [Member!]!
-    member(id: ID!): Member
+    member(id: Int!): Member
     departments: [Department!]!
     department(id: Int!): Department
     locations: [Location!]!
@@ -45,38 +47,46 @@ export const typeDefs = gql`
 
   type Mutation {
     createMember(
-      firstName: String!
-      lastName: String!
-      email: String!
-      position: String!
-      departmentId: Int
-      managerId: String
+      firstname: String!
+      lastname: String!
+      gender: String
+      startDate: String!
+      birthday: String!
+      jobDescription: String!
+      managementCategory: String!
+      serviceAssignmentCode: String!
+      professionnalEmail: String!
       imageUrl: String
-      bio: String
-      phoneNumber: String
-      locationId: Int
-    ): Member!
-    updateMember(
-      id: ID!
-      firstName: String
-      lastName: String
-      email: String
-      position: String
       departmentId: Int
-      managerId: String
-      imageUrl: String
-      bio: String
-      phoneNumber: String
       locationId: Int
+      managerId: Int
     ): Member!
-    deleteMember(id: ID!): Member!
 
-    createDepartment(name: String!, description: String): Department!
-    updateDepartment(id: Int!, name: String, description: String): Department!
+    updateMember(
+      id: Int!
+      firstname: String
+      lastname: String
+      gender: String
+      startDate: String
+      birthday: String
+      jobDescription: String
+      managementCategory: String
+      serviceAssignmentCode: String
+      professionnalEmail: String
+      imageUrl: String
+      departmentId: Int
+      locationId: Int
+      managerId: Int
+    ): Member!
+
+    deleteMember(id: Int!): Member!
+
+    createDepartment(name: String!): Department!
+    updateDepartment(id: Int!, name: String!): Department!
     deleteDepartment(id: Int!): Department!
 
-    createLocation(title: String!): Location!
-    updateLocation(id: Int!, title: String!): Location!
+    createLocation(name: String!): Location!
+    updateLocation(id: Int!, name: String!): Location!
     deleteLocation(id: Int!): Location!
   }
 `;

@@ -1,3 +1,4 @@
+
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -13,19 +14,19 @@ async function main() {
   // Créer les locations
   const paris = await prisma.location.create({
     data: {
-      title: "Paris",
+      name: "Paris",
     },
   });
 
   const lyon = await prisma.location.create({
     data: {
-      title: "Lyon",
+      name: "Lyon",
     },
   });
 
   const bordeaux = await prisma.location.create({
     data: {
-      title: "Bordeaux",
+      name: "Bordeaux",
     },
   });
 
@@ -35,42 +36,43 @@ async function main() {
   const direction = await prisma.department.create({
     data: {
       name: "Direction",
-      description: "Comité de direction et stratégie",
     },
   });
 
   const rh = await prisma.department.create({
     data: {
       name: "Ressources Humaines",
-      description: "Gestion des talents et recrutement",
     },
   });
 
   const tech = await prisma.department.create({
     data: {
       name: "Technologie",
-      description: "Développement et infrastructure",
     },
   });
 
   const marketing = await prisma.department.create({
     data: {
       name: "Marketing",
-      description: "Stratégie marketing et communication",
     },
   });
 
   console.log("Départements créés");
 
+  // Dates communes
+  const defaultBirthday = new Date("1985-01-01");
+  
   // Création des membres (sans spécifier leur manager pour l'instant)
   const ceo = await prisma.member.create({
     data: {
-      firstName: "Antoine",
-      lastName: "Dupont",
-      email: "antoine.dupont@example.com",
-      position: "PDG",
-      bio: "Fondateur et PDG avec 15 ans d'expérience dans le secteur",
-      phoneNumber: "+33 1 23 45 67 89",
+      firstname: "Antoine",
+      lastname: "Dupont",
+      gender: "Homme",
+      professionnalEmail: "antoine.dupont@example.com",
+      jobDescription: "PDG",
+      managementCategory: "Direction",
+      serviceAssignmentCode: "DIR-001",
+      birthday: defaultBirthday,
       startDate: new Date("2018-01-15"),
       imageUrl: "https://i.pravatar.cc/150?u=antoine",
       departmentId: direction.id,
@@ -80,12 +82,14 @@ async function main() {
 
   const cto = await prisma.member.create({
     data: {
-      firstName: "Marie",
-      lastName: "Lavigne",
-      email: "marie.lavigne@example.com",
-      position: "CTO",
-      bio: "Experte en architecture logicielle et en gestion d'équipes techniques",
-      phoneNumber: "+33 1 23 45 67 90",
+      firstname: "Marie",
+      lastname: "Lavigne",
+      gender: "Femme",
+      professionnalEmail: "marie.lavigne@example.com",
+      jobDescription: "CTO",
+      managementCategory: "Direction Technique",
+      serviceAssignmentCode: "TECH-001",
+      birthday: defaultBirthday,
       startDate: new Date("2019-03-10"),
       imageUrl: "https://i.pravatar.cc/150?u=marie",
       departmentId: tech.id,
@@ -95,12 +99,14 @@ async function main() {
 
   const rrhDirector = await prisma.member.create({
     data: {
-      firstName: "Paul",
-      lastName: "Martin",
-      email: "paul.martin@example.com",
-      position: "Directeur RH",
-      bio: "Spécialiste en développement organisationnel et gestion des talents",
-      phoneNumber: "+33 1 23 45 67 91",
+      firstname: "Paul",
+      lastname: "Martin",
+      gender: "Homme",
+      professionnalEmail: "paul.martin@example.com",
+      jobDescription: "Directeur RH",
+      managementCategory: "Management",
+      serviceAssignmentCode: "RH-001",
+      birthday: defaultBirthday,
       startDate: new Date("2019-05-22"),
       imageUrl: "https://i.pravatar.cc/150?u=paul",
       departmentId: rh.id,
@@ -110,12 +116,14 @@ async function main() {
 
   const marketingDirector = await prisma.member.create({
     data: {
-      firstName: "Sophie",
-      lastName: "Dubois",
-      email: "sophie.dubois@example.com",
-      position: "Directrice Marketing",
-      bio: "Expert en stratégies digitales et en développement de marque",
-      phoneNumber: "+33 1 23 45 67 92",
+      firstname: "Sophie",
+      lastname: "Dubois",
+      gender: "Femme",
+      professionnalEmail: "sophie.dubois@example.com",
+      jobDescription: "Directrice Marketing",
+      managementCategory: "Management",
+      serviceAssignmentCode: "MKT-001",
+      birthday: defaultBirthday,
       startDate: new Date("2020-01-15"),
       imageUrl: "https://i.pravatar.cc/150?u=sophie",
       departmentId: marketing.id,
@@ -126,12 +134,14 @@ async function main() {
   // Développeurs
   const leadDev = await prisma.member.create({
     data: {
-      firstName: "Lucas",
-      lastName: "Petit",
-      email: "lucas.petit@example.com",
-      position: "Lead Developer",
-      bio: "Spécialiste en architecture front-end et technologies React",
-      phoneNumber: "+33 1 23 45 67 93",
+      firstname: "Lucas",
+      lastname: "Petit",
+      gender: "Homme",
+      professionnalEmail: "lucas.petit@example.com",
+      jobDescription: "Lead Developer",
+      managementCategory: "Tech Lead",
+      serviceAssignmentCode: "TECH-002",
+      birthday: defaultBirthday,
       startDate: new Date("2020-04-10"),
       imageUrl: "https://i.pravatar.cc/150?u=lucas",
       departmentId: tech.id,
@@ -141,12 +151,14 @@ async function main() {
 
   const backendDev = await prisma.member.create({
     data: {
-      firstName: "Emma",
-      lastName: "Girard",
-      email: "emma.girard@example.com",
-      position: "Backend Developer",
-      bio: "Experte en développement d'APIs et systèmes distribués",
-      phoneNumber: "+33 1 23 45 67 94",
+      firstname: "Emma",
+      lastname: "Girard",
+      gender: "Femme",
+      professionnalEmail: "emma.girard@example.com",
+      jobDescription: "Backend Developer",
+      managementCategory: "Technique",
+      serviceAssignmentCode: "TECH-003",
+      birthday: defaultBirthday,
       startDate: new Date("2021-02-15"),
       imageUrl: "https://i.pravatar.cc/150?u=emma",
       departmentId: tech.id,
@@ -156,12 +168,14 @@ async function main() {
 
   const frontendDev = await prisma.member.create({
     data: {
-      firstName: "Thomas",
-      lastName: "Moreau",
-      email: "thomas.moreau@example.com",
-      position: "Frontend Developer",
-      bio: "Développeur UI/UX avec spécialisation en accessibilité",
-      phoneNumber: "+33 1 23 45 67 95",
+      firstname: "Thomas",
+      lastname: "Moreau",
+      gender: "Homme",
+      professionnalEmail: "thomas.moreau@example.com",
+      jobDescription: "Frontend Developer",
+      managementCategory: "Technique",
+      serviceAssignmentCode: "TECH-004",
+      birthday: defaultBirthday,
       startDate: new Date("2021-07-01"),
       imageUrl: "https://i.pravatar.cc/150?u=thomas",
       departmentId: tech.id,
@@ -172,12 +186,14 @@ async function main() {
   // RH et Marketing
   const hrRecruiter = await prisma.member.create({
     data: {
-      firstName: "Chloé",
-      lastName: "Bernard",
-      email: "chloe.bernard@example.com",
-      position: "Chargée de recrutement",
-      bio: "Spécialiste en recrutement tech et assessment",
-      phoneNumber: "+33 1 23 45 67 96",
+      firstname: "Chloé",
+      lastname: "Bernard",
+      gender: "Femme",
+      professionnalEmail: "chloe.bernard@example.com",
+      jobDescription: "Chargée de recrutement",
+      managementCategory: "RH",
+      serviceAssignmentCode: "RH-002",
+      birthday: defaultBirthday,
       startDate: new Date("2021-09-15"),
       imageUrl: "https://i.pravatar.cc/150?u=chloe",
       departmentId: rh.id,
@@ -187,12 +203,14 @@ async function main() {
 
   const marketingManager = await prisma.member.create({
     data: {
-      firstName: "Julien",
-      lastName: "Roux",
-      email: "julien.roux@example.com",
-      position: "Marketing Manager",
-      bio: "Expert en marketing digital et analyse de données",
-      phoneNumber: "+33 1 23 45 67 97",
+      firstname: "Julien",
+      lastname: "Roux",
+      gender: "Homme",
+      professionnalEmail: "julien.roux@example.com",
+      jobDescription: "Marketing Manager",
+      managementCategory: "Marketing",
+      serviceAssignmentCode: "MKT-002",
+      birthday: defaultBirthday,
       startDate: new Date("2022-01-10"),
       imageUrl: "https://i.pravatar.cc/150?u=julien",
       departmentId: marketing.id,
