@@ -5,7 +5,7 @@ import { useTeam } from '@/context/TeamContext';
 import MemberForm from '@/components/forms/MemberForm';
 import MemberCard from '@/components/ui/MemberCard';
 import { 
-  Mail, Phone, MapPin, Calendar, Users, BadgeCheck, ChevronLeft,
+  Mail, Phone, MapPin, Calendar, Users, ChevronLeft,
   Pencil, Trash2, AlertTriangle, X
 } from 'lucide-react';
 
@@ -44,7 +44,7 @@ const Member: React.FC = () => {
   }
   
   // Get member data
-  const member = getTeamMember(id || '');
+  const member = getTeamMember(parseInt(id || '0'));
   
   if (!member) {
     return (
@@ -116,37 +116,25 @@ const Member: React.FC = () => {
           <div className="glassmorphism rounded-xl overflow-hidden sticky top-20">
             <div className="aspect-square">
               <img 
-                src={member.imageUrl} 
-                alt={`${member.firstName} ${member.lastName}`} 
+                src={member.imageUrl || '/placeholder.svg'} 
+                alt={`${member.firstname} ${member.lastname}`} 
                 className="w-full h-full object-cover"
               />
             </div>
             
             <div className="p-4">
-              <h1 className="text-xl font-semibold">{member.firstName} {member.lastName}</h1>
-              <p className="text-muted-foreground mb-4">{member.position}</p>
+              <h1 className="text-xl font-semibold">{member.firstname} {member.lastname}</h1>
+              <p className="text-muted-foreground mb-4">{member.jobDescription}</p>
               
               <div className="space-y-2">
-                {member.email && (
+                {member.professionnalEmail && (
                   <div className="flex items-center">
                     <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
                     <a 
-                      href={`mailto:${member.email}`} 
+                      href={`mailto:${member.professionnalEmail}`} 
                       className="text-sm text-primary hover:underline"
                     >
-                      {member.email}
-                    </a>
-                  </div>
-                )}
-                
-                {member.phoneNumber && (
-                  <div className="flex items-center">
-                    <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <a 
-                      href={`tel:${member.phoneNumber}`} 
-                      className="text-sm"
-                    >
-                      {member.phoneNumber}
+                      {member.professionnalEmail}
                     </a>
                   </div>
                 )}
@@ -154,7 +142,7 @@ const Member: React.FC = () => {
                 {member.location && (
                   <div className="flex items-center">
                     <MapPin className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span className="text-sm">{member.location}</span>
+                    <span className="text-sm">{member.location.name}</span>
                   </div>
                 )}
                 
@@ -169,7 +157,7 @@ const Member: React.FC = () => {
                 
                 <div className="flex items-center">
                   <Users className="h-4 w-4 mr-2 text-muted-foreground" />
-                  <span className="text-sm">{member.department}</span>
+                  <span className="text-sm">{member.department?.name}</span>
                 </div>
               </div>
               
@@ -195,31 +183,35 @@ const Member: React.FC = () => {
         
         {/* Right column - Detailed info and relationships */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Bio section */}
-          {member.bio && (
-            <div className="glassmorphism rounded-xl p-6 animate-fade-up">
-              <h2 className="text-lg font-semibold mb-3">About</h2>
-              <p className="text-muted-foreground">{member.bio}</p>
-            </div>
-          )}
-          
-          {/* Skills section */}
-          {member.skills && member.skills.length > 0 && (
-            <div className="glassmorphism rounded-xl p-6 animate-fade-up" style={{ animationDelay: '100ms' }}>
-              <h2 className="text-lg font-semibold mb-3">Skills</h2>
-              <div className="flex flex-wrap gap-2">
-                {member.skills.map(skill => (
-                  <span 
-                    key={skill}
-                    className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm flex items-center"
-                  >
-                    <BadgeCheck className="h-3 w-3 mr-1" />
-                    {skill}
-                  </span>
-                ))}
+          {/* Additional info section */}
+          <div className="glassmorphism rounded-xl p-6 animate-fade-up">
+            <h2 className="text-lg font-semibold mb-3">Additional Information</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {member.gender && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Gender</p>
+                  <p>{member.gender}</p>
+                </div>
+              )}
+              
+              {member.birthday && (
+                <div>
+                  <p className="text-sm text-muted-foreground">Birthday</p>
+                  <p>{new Date(member.birthday).toLocaleDateString()}</p>
+                </div>
+              )}
+              
+              <div>
+                <p className="text-sm text-muted-foreground">Management Category</p>
+                <p>{member.managementCategory}</p>
+              </div>
+              
+              <div>
+                <p className="text-sm text-muted-foreground">Service Assignment Code</p>
+                <p>{member.serviceAssignmentCode}</p>
               </div>
             </div>
-          )}
+          </div>
           
           {/* Manager section */}
           {manager && (
@@ -263,7 +255,7 @@ const Member: React.FC = () => {
             </div>
             
             <p className="mb-4">
-              Are you sure you want to delete <strong>{member.firstName} {member.lastName}</strong>? 
+              Are you sure you want to delete <strong>{member.firstname} {member.lastname}</strong>? 
               This action cannot be undone.
             </p>
             

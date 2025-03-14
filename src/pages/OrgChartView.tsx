@@ -13,7 +13,11 @@ const OrgChartView: React.FC = () => {
   const [showControls, setShowControls] = useState<boolean>(true);
   
   // Get unique departments for filter
-  const departments = [...new Set(teamMembers.map(member => member.department))].sort();
+  const departments = [...new Set(
+    teamMembers
+      .map(member => member.department?.name)
+      .filter(Boolean)
+  )].sort();
   
   // Handle department selection/deselection
   const toggleDepartment = (department: string) => {
@@ -70,7 +74,7 @@ const OrgChartView: React.FC = () => {
         </div>
         
         <div className="flex flex-wrap gap-2">
-          {departments.map(department => (
+          {departments.map(department => department && (
             <Button
               key={department}
               variant={selectedDepartments.includes(department) ? "default" : "outline"}

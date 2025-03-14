@@ -9,9 +9,9 @@ interface TeamContextProps {
   teamHierarchy: any[];
   addTeamMember: (member: Omit<TeamMember, 'id'>) => void;
   updateTeamMember: (member: TeamMember) => void;
-  deleteTeamMember: (id: string) => void;
-  getTeamMember: (id: string) => TeamMember | undefined;
-  getDirectReports: (managerId: string | null) => TeamMembers;
+  deleteTeamMember: (id: number) => void;
+  getTeamMember: (id: number) => TeamMember | undefined;
+  getDirectReports: (managerId: number | null) => TeamMembers;
 }
 
 const TeamContext = createContext<TeamContextProps | undefined>(undefined);
@@ -33,7 +33,7 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Add a new team member
   const addTeamMember = (memberData: Omit<TeamMember, 'id'>) => {
-    const id = Math.random().toString(36).substring(2, 11);
+    const id = Math.max(0, ...teamMembers.map(m => m.id)) + 1;
     const newMember = { id, ...memberData };
     
     setTeamMembers(prev => [...prev, newMember]);
@@ -57,7 +57,7 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Delete a team member
-  const deleteTeamMember = (id: string) => {
+  const deleteTeamMember = (id: number) => {
     // First, reassign all direct reports to the deleted member's manager
     const memberToDelete = teamMembers.find(m => m.id === id);
     if (!memberToDelete) return;
@@ -83,12 +83,12 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   // Get a specific team member by ID
-  const getTeamMember = (id: string) => {
+  const getTeamMember = (id: number) => {
     return teamMembers.find(member => member.id === id);
   };
 
   // Get all direct reports for a manager
-  const getDirectReports = (managerId: string | null) => {
+  const getDirectReports = (managerId: number | null) => {
     return teamMembers.filter(member => member.managerId === managerId);
   };
 

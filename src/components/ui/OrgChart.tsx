@@ -51,7 +51,9 @@ const OrgChart: React.FC<OrgChartProps> = ({ selectedDepartments = [], zoomLevel
   // Filter team members by departments if departments are selected
   const filteredTeamMembers = useMemo(() => {
     if (selectedDepartments.length === 0) return teamMembers;
-    return teamMembers.filter(member => selectedDepartments.includes(member.department));
+    return teamMembers.filter(member => 
+      member.department && selectedDepartments.includes(member.department.name)
+    );
   }, [teamMembers, selectedDepartments]);
   
   // Build hierarchy from filtered members
@@ -86,7 +88,7 @@ const OrgChart: React.FC<OrgChartProps> = ({ selectedDepartments = [], zoomLevel
   }
   
   // Function to get hierarchical representation of team
-  function getTeamHierarchy(members: TeamMember[], managerId: string | null = null): any[] {
+  function getTeamHierarchy(members: TeamMember[], managerId: number | null = null): any[] {
     const directReports = members.filter(member => member.managerId === managerId);
     
     return directReports.map(member => ({

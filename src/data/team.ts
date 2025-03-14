@@ -1,12 +1,43 @@
 
-import { TeamMember, TeamMembers } from '../types';
+import { TeamMember, TeamMembers, Department, Location } from '../types';
 
-// Function to generate a unique ID
-const generateId = (): string => {
-  return Math.random().toString(36).substring(2, 11);
+// Create sample departments
+const departments: Department[] = [
+  { id: 1, name: 'Executive' },
+  { id: 2, name: 'Technology' },
+  { id: 3, name: 'Finance' },
+  { id: 4, name: 'Product' },
+  { id: 5, name: 'Human Resources' },
+  { id: 6, name: 'Engineering' },
+  { id: 7, name: 'Design' },
+  { id: 8, name: 'Marketing' },
+  { id: 9, name: 'Sales' },
+  { id: 10, name: 'Support' }
+];
+
+// Create sample locations
+const locations: Location[] = [
+  { id: 1, name: 'New York' },
+  { id: 2, name: 'San Francisco' },
+  { id: 3, name: 'Chicago' },
+  { id: 4, name: 'Boston' },
+  { id: 5, name: 'Miami' },
+  { id: 6, name: 'Seattle' },
+  { id: 7, name: 'Los Angeles' },
+  { id: 8, name: 'Austin' }
+];
+
+// Function to get a department by id
+const getDepartment = (id: number): Department => {
+  return departments.find(d => d.id === id) || departments[0];
 };
 
-// Generate placeholder image URL
+// Function to get a location by id
+const getLocation = (id: number): Location => {
+  return locations.find(l => l.id === id) || locations[0];
+};
+
+// Function to generate a placeholder image URL
 const getPlaceholderImage = (id: number): string => {
   return `https://i.pravatar.cc/300?img=${id % 70}`; // Using pravatar.cc for placeholder images
 };
@@ -14,126 +45,174 @@ const getPlaceholderImage = (id: number): string => {
 // Sample team data
 export const initialTeamData: TeamMembers = [
   {
-    id: '1',
-    firstName: 'Emily',
-    lastName: 'Johnson',
-    email: 'emily.johnson@company.com',
-    position: 'CEO',
-    department: 'Executive',
+    id: 1,
+    firstname: 'Emily',
+    lastname: 'Johnson',
+    professionnalEmail: 'emily.johnson@company.com',
+    jobDescription: 'CEO',
+    managementCategory: 'Executive',
+    serviceAssignmentCode: 'EX-001',
+    gender: 'Female',
+    departmentId: 1,
+    department: getDepartment(1),
     managerId: null,
+    locationId: 1,
+    location: getLocation(1),
     imageUrl: getPlaceholderImage(1),
-    bio: 'Emily has led the company for 8 years with a focus on innovation and sustainable growth.',
     startDate: '2016-03-15',
-    phoneNumber: '+1 (555) 123-4567',
-    location: 'New York',
-    skills: ['Leadership', 'Strategic Planning', 'Business Development']
+    birthday: '1980-05-12',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
-    id: '2',
-    firstName: 'Michael',
-    lastName: 'Chen',
-    email: 'michael.chen@company.com',
-    position: 'CTO',
-    department: 'Technology',
-    managerId: '1',
+    id: 2,
+    firstname: 'Michael',
+    lastname: 'Chen',
+    professionnalEmail: 'michael.chen@company.com',
+    jobDescription: 'CTO',
+    managementCategory: 'Executive',
+    serviceAssignmentCode: 'EX-002',
+    gender: 'Male',
+    departmentId: 2,
+    department: getDepartment(2),
+    managerId: 1,
+    locationId: 2,
+    location: getLocation(2),
     imageUrl: getPlaceholderImage(2),
-    bio: 'Michael oversees all technical aspects of the company with 15+ years of experience in software development.',
     startDate: '2017-06-02',
-    phoneNumber: '+1 (555) 234-5678',
-    location: 'San Francisco',
-    skills: ['Software Architecture', 'AI/ML', 'Cloud Infrastructure']
+    birthday: '1982-09-23',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
-    id: '3',
-    firstName: 'Sarah',
-    lastName: 'Patel',
-    email: 'sarah.patel@company.com',
-    position: 'CFO',
-    department: 'Finance',
-    managerId: '1',
+    id: 3,
+    firstname: 'Sarah',
+    lastname: 'Patel',
+    professionnalEmail: 'sarah.patel@company.com',
+    jobDescription: 'CFO',
+    managementCategory: 'Executive',
+    serviceAssignmentCode: 'EX-003',
+    gender: 'Female',
+    departmentId: 3,
+    department: getDepartment(3),
+    managerId: 1,
+    locationId: 3,
+    location: getLocation(3),
     imageUrl: getPlaceholderImage(3),
-    bio: 'Sarah manages all financial operations and strategic financial planning for the company.',
     startDate: '2018-02-12',
-    phoneNumber: '+1 (555) 345-6789',
-    location: 'Chicago',
-    skills: ['Financial Analysis', 'Risk Management', 'Strategic Planning']
+    birthday: '1979-11-05',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
-    id: '4',
-    firstName: 'David',
-    lastName: 'Thompson',
-    email: 'david.thompson@company.com',
-    position: 'VP of Product',
-    department: 'Product',
-    managerId: '1',
+    id: 4,
+    firstname: 'David',
+    lastname: 'Thompson',
+    professionnalEmail: 'david.thompson@company.com',
+    jobDescription: 'VP of Product',
+    managementCategory: 'Management',
+    serviceAssignmentCode: 'PM-001',
+    gender: 'Male',
+    departmentId: 4,
+    department: getDepartment(4),
+    managerId: 1,
+    locationId: 4,
+    location: getLocation(4),
     imageUrl: getPlaceholderImage(4),
-    bio: 'David leads the product team in developing innovative solutions for our customers.',
     startDate: '2019-04-25',
-    location: 'Boston',
-    skills: ['Product Strategy', 'User Experience', 'Market Research']
+    birthday: '1985-07-18',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
-    id: '5',
-    firstName: 'Jennifer',
-    lastName: 'Martinez',
-    email: 'jennifer.martinez@company.com',
-    position: 'VP of HR',
-    department: 'Human Resources',
-    managerId: '1',
+    id: 5,
+    firstname: 'Jennifer',
+    lastname: 'Martinez',
+    professionnalEmail: 'jennifer.martinez@company.com',
+    jobDescription: 'VP of HR',
+    managementCategory: 'Management',
+    serviceAssignmentCode: 'HR-001',
+    gender: 'Female',
+    departmentId: 5,
+    department: getDepartment(5),
+    managerId: 1,
+    locationId: 5,
+    location: getLocation(5),
     imageUrl: getPlaceholderImage(5),
-    bio: 'Jennifer oversees all HR functions, including talent acquisition and employee development.',
     startDate: '2019-08-03',
-    location: 'Miami',
-    skills: ['Talent Management', 'Organizational Development', 'Employment Law']
+    birthday: '1983-02-14',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
-    id: '6',
-    firstName: 'Alex',
-    lastName: 'Wong',
-    email: 'alex.wong@company.com',
-    position: 'Engineering Manager',
-    department: 'Technology',
-    managerId: '2',
+    id: 6,
+    firstname: 'Alex',
+    lastname: 'Wong',
+    professionnalEmail: 'alex.wong@company.com',
+    jobDescription: 'Engineering Manager',
+    managementCategory: 'Management',
+    serviceAssignmentCode: 'EG-001',
+    gender: 'Male',
+    departmentId: 6,
+    department: getDepartment(6),
+    managerId: 2,
+    locationId: 6,
+    location: getLocation(6),
     imageUrl: getPlaceholderImage(6),
     startDate: '2018-11-15',
-    location: 'Seattle',
-    skills: ['Software Engineering', 'Team Leadership', 'Agile Methodologies']
+    birthday: '1987-06-22',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
-    id: '7',
-    firstName: 'Rachel',
-    lastName: 'Kim',
-    email: 'rachel.kim@company.com',
-    position: 'Senior Developer',
-    department: 'Technology',
-    managerId: '6',
+    id: 7,
+    firstname: 'Rachel',
+    lastname: 'Kim',
+    professionnalEmail: 'rachel.kim@company.com',
+    jobDescription: 'Senior Developer',
+    managementCategory: 'Individual Contributor',
+    serviceAssignmentCode: 'SD-001',
+    gender: 'Female',
+    departmentId: 6,
+    department: getDepartment(6),
+    managerId: 6,
+    locationId: 7,
+    location: getLocation(7),
     imageUrl: getPlaceholderImage(7),
     startDate: '2020-01-20',
-    location: 'Los Angeles',
-    skills: ['JavaScript', 'React', 'Node.js']
+    birthday: '1990-10-30',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   },
   {
-    id: '8',
-    firstName: 'Carlos',
-    lastName: 'Garcia',
-    email: 'carlos.garcia@company.com',
-    position: 'UX Designer',
-    department: 'Product',
-    managerId: '4',
+    id: 8,
+    firstname: 'Carlos',
+    lastname: 'Garcia',
+    professionnalEmail: 'carlos.garcia@company.com',
+    jobDescription: 'UX Designer',
+    managementCategory: 'Individual Contributor',
+    serviceAssignmentCode: 'DS-001',
+    gender: 'Male',
+    departmentId: 7,
+    department: getDepartment(7),
+    managerId: 4,
+    locationId: 8,
+    location: getLocation(8),
     imageUrl: getPlaceholderImage(8),
     startDate: '2021-03-08',
-    location: 'Austin',
-    skills: ['UI/UX Design', 'Wireframing', 'User Research']
+    birthday: '1992-04-17',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
   }
 ];
 
 // Utility function to get all direct reports for a manager
-export const getDirectReports = (teamMembers: TeamMembers, managerId: string | null): TeamMembers => {
+export const getDirectReports = (teamMembers: TeamMembers, managerId: number | null): TeamMembers => {
   return teamMembers.filter(member => member.managerId === managerId);
 };
 
 // Function to get a flattened hierarchical representation of team
-export const getTeamHierarchy = (teamMembers: TeamMembers, managerId: string | null = null): any[] => {
+export const getTeamHierarchy = (teamMembers: TeamMembers, managerId: number | null = null): any[] => {
   const directReports = getDirectReports(teamMembers, managerId);
   
   return directReports.map(member => ({
@@ -146,9 +225,8 @@ export const getTeamHierarchy = (teamMembers: TeamMembers, managerId: string | n
 export const generateTeamMembers = (count: number, existingMembers: TeamMembers): TeamMembers => {
   const firstNames = ['James', 'Robert', 'John', 'William', 'Richard', 'Thomas', 'Mary', 'Patricia', 'Linda', 'Barbara', 'Elizabeth', 'Susan', 'Jessica', 'Sarah', 'Karen', 'Nancy', 'Lisa', 'Margaret', 'Betty', 'Sandra'];
   const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Miller', 'Davis', 'Garcia', 'Rodriguez', 'Wilson', 'Martinez', 'Anderson', 'Taylor', 'Thomas', 'Hernandez', 'Moore', 'Martin', 'Jackson', 'Thompson', 'White'];
-  const positions = ['Software Engineer', 'Product Manager', 'UI Designer', 'QA Engineer', 'Data Scientist', 'System Administrator', 'Marketing Specialist', 'Sales Representative', 'Customer Support', 'Financial Analyst'];
-  const departments = ['Engineering', 'Product', 'Design', 'QA', 'Data', 'IT', 'Marketing', 'Sales', 'Support', 'Finance'];
-  const locations = ['New York', 'San Francisco', 'Chicago', 'Los Angeles', 'Seattle', 'Austin', 'Boston', 'Denver', 'Atlanta', 'Miami'];
+  const jobDescriptions = ['Software Engineer', 'Product Manager', 'UI Designer', 'QA Engineer', 'Data Scientist', 'System Administrator', 'Marketing Specialist', 'Sales Representative', 'Customer Support', 'Financial Analyst'];
+  const managementCategories = ['Individual Contributor', 'Management', 'Executive'];
   
   const newMembers: TeamMembers = [];
   const allMembers = [...existingMembers];
@@ -157,27 +235,49 @@ export const generateTeamMembers = (count: number, existingMembers: TeamMembers)
   const potentialManagerIds = existingMembers.map(m => m.id);
   
   for (let i = 0; i < count; i++) {
-    const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
-    const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
-    const position = positions[Math.floor(Math.random() * positions.length)];
-    const department = departments[Math.floor(Math.random() * departments.length)];
-    const location = locations[Math.floor(Math.random() * locations.length)];
+    const id = existingMembers.length + i + 1;
+    const firstname = firstNames[Math.floor(Math.random() * firstNames.length)];
+    const lastname = lastNames[Math.floor(Math.random() * lastNames.length)];
+    const jobDescription = jobDescriptions[Math.floor(Math.random() * jobDescriptions.length)];
+    const departmentId = Math.floor(Math.random() * departments.length) + 1;
+    const locationId = Math.floor(Math.random() * locations.length) + 1;
+    const managementCategory = managementCategories[Math.floor(Math.random() * managementCategories.length)];
+    const serviceAssignmentCode = `${departmentId}-${id.toString().padStart(3, '0')}`;
     
     // Randomly assign a manager from existing members
     const managerId = potentialManagerIds[Math.floor(Math.random() * potentialManagerIds.length)];
     
+    // Generate random birthdates between 1970 and 2000
+    const birthYear = 1970 + Math.floor(Math.random() * 30);
+    const birthMonth = Math.floor(Math.random() * 12) + 1;
+    const birthDay = Math.floor(Math.random() * 28) + 1;
+    const birthday = `${birthYear}-${birthMonth.toString().padStart(2, '0')}-${birthDay.toString().padStart(2, '0')}`;
+    
+    // Generate random start dates within the past 5 years
+    const startYear = 2018 + Math.floor(Math.random() * 5);
+    const startMonth = Math.floor(Math.random() * 12) + 1;
+    const startDay = Math.floor(Math.random() * 28) + 1;
+    const startDate = `${startYear}-${startMonth.toString().padStart(2, '0')}-${startDay.toString().padStart(2, '0')}`;
+    
     const newMember: TeamMember = {
-      id: generateId(),
-      firstName,
-      lastName,
-      email: `${firstName.toLowerCase()}.${lastName.toLowerCase()}@company.com`,
-      position,
-      department,
+      id,
+      firstname,
+      lastname,
+      professionnalEmail: `${firstname.toLowerCase()}.${lastname.toLowerCase()}@company.com`,
+      jobDescription,
+      managementCategory,
+      serviceAssignmentCode,
+      gender: Math.random() > 0.5 ? 'Male' : 'Female',
+      departmentId,
+      department: getDepartment(departmentId),
       managerId,
-      imageUrl: getPlaceholderImage(existingMembers.length + i + 1),
-      startDate: new Date(Date.now() - Math.random() * 94608000000).toISOString().split('T')[0], // Random date within last 3 years
-      location,
-      skills: []
+      locationId,
+      location: getLocation(locationId),
+      imageUrl: getPlaceholderImage(id),
+      startDate,
+      birthday,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
     };
     
     newMembers.push(newMember);

@@ -12,17 +12,21 @@ const Members: React.FC = () => {
   const [filteredMembers, setFilteredMembers] = useState(teamMembers);
   
   // Get unique departments for filter
-  const departments = [...new Set(teamMembers.map(member => member.department))];
+  const departments = [...new Set(
+    teamMembers
+      .map(member => member.department?.name)
+      .filter(Boolean)
+  )];
   
   // Filter members based on search and department
   useEffect(() => {
     const filtered = teamMembers.filter(member => {
       const matchesSearch = searchTerm === '' || 
-        `${member.firstName} ${member.lastName}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        member.position.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        member.email.toLowerCase().includes(searchTerm.toLowerCase());
+        `${member.firstname} ${member.lastname}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        member.jobDescription.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        member.professionnalEmail.toLowerCase().includes(searchTerm.toLowerCase());
         
-      const matchesDepartment = departmentFilter === '' || member.department === departmentFilter;
+      const matchesDepartment = departmentFilter === '' || member.department?.name === departmentFilter;
       
       return matchesSearch && matchesDepartment;
     });
@@ -64,7 +68,7 @@ const Members: React.FC = () => {
               className="w-full appearance-none pl-9 pr-8 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary bg-white"
             >
               <option value="">All Departments</option>
-              {departments.map(department => (
+              {departments.map(department => department && (
                 <option key={department} value={department}>
                   {department}
                 </option>

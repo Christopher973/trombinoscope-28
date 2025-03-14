@@ -1,12 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTeam } from '@/context/TeamContext';
-import { TeamMember } from '@/types';
+import { TeamMember, Department, Location } from '@/types';
 import { toast } from '@/hooks/use-toast';
 import { X } from 'lucide-react';
 
 interface MemberFormProps {
-  memberId?: string;
+  memberId?: number;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
@@ -19,22 +19,24 @@ const MemberForm: React.FC<MemberFormProps> = ({
   const { teamMembers, addTeamMember, updateTeamMember, getTeamMember } = useTeam();
   
   const [formData, setFormData] = useState<Omit<TeamMember, 'id'>>({
-    firstName: '',
-    lastName: '',
-    email: '',
-    position: '',
-    department: '',
+    firstname: '',
+    lastname: '',
+    gender: '',
+    professionnalEmail: '',
+    jobDescription: '',
+    managementCategory: '',
+    serviceAssignmentCode: '',
+    departmentId: undefined,
+    department: undefined,
     managerId: null,
+    locationId: undefined,
+    location: undefined,
     imageUrl: 'https://i.pravatar.cc/300',
-    bio: '',
-    startDate: '',
-    phoneNumber: '',
-    location: '',
-    skills: []
+    startDate: new Date().toISOString().split('T')[0],
+    birthday: '',
+    createdAt: new Date(),
+    updatedAt: new Date()
   });
-  
-  const [newSkill, setNewSkill] = useState('');
-  const isEditing = !!memberId;
   
   // If editing, load the member data
   useEffect(() => {
@@ -56,25 +58,30 @@ const MemberForm: React.FC<MemberFormProps> = ({
     const value = e.target.value;
     setFormData(prev => ({ 
       ...prev, 
-      managerId: value === '' ? null : value 
+      managerId: value === '' ? null : Number(value) 
     }));
   };
   
-  const addSkill = () => {
-    if (newSkill.trim() && !formData.skills?.includes(newSkill.trim())) {
-      setFormData(prev => ({
-        ...prev,
-        skills: [...(prev.skills || []), newSkill.trim()]
-      }));
-      setNewSkill('');
+  const handleDepartmentChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    if (value === '') {
+      setFormData(prev => ({ ...prev, departmentId: undefined, department: undefined }));
+    } else {
+      const departmentId = Number(value);
+      const department = teamMembers.find(m => m.departmentId === departmentId)?.department;
+      setFormData(prev => ({ ...prev, departmentId, department }));
     }
   };
   
-  const removeSkill = (skillToRemove: string) => {
-    setFormData(prev => ({
-      ...prev,
-      skills: prev.skills?.filter(skill => skill !== skillToRemove) || []
-    }));
+  const handleLocationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    if (value === '') {
+      setFormData(prev => ({ ...prev, locationId: undefined, location: undefined }));
+    } else {
+      const locationId = Number(value);
+      const location = teamMembers.find(m => m.locationId === locationId)?.location;
+      setFormData(prev => ({ ...prev, locationId, location }));
+    }
   };
   
   const handleSubmit = (e: React.FormEvent) => {
@@ -100,6 +107,12 @@ const MemberForm: React.FC<MemberFormProps> = ({
     }
   };
   
+  const isEditing = !!memberId;
+  
+  // Get unique departments and locations for dropdowns
+  const departments = [...new Set(teamMembers.map(m => m.department).filter(Boolean))];
+  const locations = [...new Set(teamMembers.map(m => m.location).filter(Boolean))];
+  
   return (
     <div className="animate-fade-in">
       <h2 className="text-xl font-semibold mb-4">
@@ -112,8 +125,8 @@ const MemberForm: React.FC<MemberFormProps> = ({
             <label className="block text-sm font-medium mb-1">First Name</label>
             <input
               type="text"
-              name="firstName"
-              value={formData.firstName}
+              name="firstname"
+              value={formData.firstname}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
               required
@@ -124,8 +137,8 @@ const MemberForm: React.FC<MemberFormProps> = ({
             <label className="block text-sm font-medium mb-1">Last Name</label>
             <input
               type="text"
-              name="lastName"
-              value={formData.lastName}
+              name="lastname"
+              value={formData.lastname}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
               required
@@ -133,11 +146,11 @@ const MemberForm: React.FC<MemberFormProps> = ({
           </div>
           
           <div>
-            <label className="block text-sm font-medium mb-1">Email</label>
+            <label className="block text-sm font-medium mb-1">Professional Email</label>
             <input
               type="email"
-              name="email"
-              value={formData.email}
+              name="professionnalEmail"
+              value={formData.professionnalEmail}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
               required
@@ -145,49 +158,80 @@ const MemberForm: React.FC<MemberFormProps> = ({
           </div>
           
           <div>
-            <label className="block text-sm font-medium mb-1">Phone Number</label>
-            <input
-              type="text"
-              name="phoneNumber"
-              value={formData.phoneNumber || ''}
+            <label className="block text-sm font-medium mb-1">Gender</label>
+            <select
+              name="gender"
+              value={formData.gender || ''}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
-            />
+            >
+              <option value="">Select Gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
+            </select>
           </div>
           
           <div>
-            <label className="block text-sm font-medium mb-1">Position</label>
+            <label className="block text-sm font-medium mb-1">Job Description</label>
             <input
               type="text"
-              name="position"
-              value={formData.position}
+              name="jobDescription"
+              value={formData.jobDescription}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
               required
             />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium mb-1">Management Category</label>
+            <select
+              name="managementCategory"
+              value={formData.managementCategory}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+              required
+            >
+              <option value="">Select Category</option>
+              <option value="Individual Contributor">Individual Contributor</option>
+              <option value="Management">Management</option>
+              <option value="Executive">Executive</option>
+            </select>
           </div>
           
           <div>
             <label className="block text-sm font-medium mb-1">Department</label>
-            <input
-              type="text"
-              name="department"
-              value={formData.department}
-              onChange={handleChange}
+            <select
+              name="departmentId"
+              value={formData.departmentId || ''}
+              onChange={handleDepartmentChange}
               className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
-              required
-            />
+            >
+              <option value="">Select Department</option>
+              {departments.map(dept => dept && (
+                <option key={dept.id} value={dept.id}>
+                  {dept.name}
+                </option>
+              ))}
+            </select>
           </div>
           
           <div>
             <label className="block text-sm font-medium mb-1">Location</label>
-            <input
-              type="text"
-              name="location"
-              value={formData.location || ''}
-              onChange={handleChange}
+            <select
+              name="locationId"
+              value={formData.locationId || ''}
+              onChange={handleLocationChange}
               className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
-            />
+            >
+              <option value="">Select Location</option>
+              {locations.map(loc => loc && (
+                <option key={loc.id} value={loc.id}>
+                  {loc.name}
+                </option>
+              ))}
+            </select>
           </div>
           
           <div>
@@ -195,9 +239,34 @@ const MemberForm: React.FC<MemberFormProps> = ({
             <input
               type="date"
               name="startDate"
-              value={formData.startDate || ''}
+              value={typeof formData.startDate === 'string' ? formData.startDate.split('T')[0] : ''}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+              required
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium mb-1">Birthday</label>
+            <input
+              type="date"
+              name="birthday"
+              value={typeof formData.birthday === 'string' ? formData.birthday.split('T')[0] : ''}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+              required
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium mb-1">Service Assignment Code</label>
+            <input
+              type="text"
+              name="serviceAssignmentCode"
+              value={formData.serviceAssignmentCode}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+              required
             />
           </div>
         </div>
@@ -207,10 +276,9 @@ const MemberForm: React.FC<MemberFormProps> = ({
           <input
             type="text"
             name="imageUrl"
-            value={formData.imageUrl}
+            value={formData.imageUrl || ''}
             onChange={handleChange}
             className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
-            required
           />
         </div>
         
@@ -218,7 +286,7 @@ const MemberForm: React.FC<MemberFormProps> = ({
           <label className="block text-sm font-medium mb-1">Manager</label>
           <select
             name="managerId"
-            value={formData.managerId || ''}
+            value={formData.managerId === null ? '' : formData.managerId}
             onChange={handleManagerChange}
             className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
           >
@@ -227,61 +295,11 @@ const MemberForm: React.FC<MemberFormProps> = ({
               .filter(m => m.id !== memberId) // Can't be your own manager
               .map(manager => (
                 <option key={manager.id} value={manager.id}>
-                  {manager.firstName} {manager.lastName} - {manager.position}
+                  {manager.firstname} {manager.lastname} - {manager.jobDescription}
                 </option>
               ))
             }
           </select>
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium mb-1">Bio</label>
-          <textarea
-            name="bio"
-            value={formData.bio || ''}
-            onChange={handleChange}
-            rows={3}
-            className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
-          />
-        </div>
-        
-        <div>
-          <label className="block text-sm font-medium mb-1">Skills</label>
-          <div className="flex space-x-2">
-            <input
-              type="text"
-              value={newSkill}
-              onChange={(e) => setNewSkill(e.target.value)}
-              className="flex-1 px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
-              placeholder="Add a skill"
-              onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSkill())}
-            />
-            <button
-              type="button"
-              onClick={addSkill}
-              className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
-            >
-              Add
-            </button>
-          </div>
-          
-          <div className="mt-2 flex flex-wrap gap-2">
-            {formData.skills?.map(skill => (
-              <span 
-                key={skill} 
-                className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary"
-              >
-                {skill}
-                <button
-                  type="button"
-                  onClick={() => removeSkill(skill)}
-                  className="ml-1 text-primary/70 hover:text-primary"
-                >
-                  <X className="h-3 w-3" />
-                </button>
-              </span>
-            ))}
-          </div>
         </div>
         
         <div className="flex justify-end space-x-2 pt-4">
