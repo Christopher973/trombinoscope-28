@@ -2,6 +2,7 @@
 export interface Department {
   id: number;
   name: string;
+  members?: TeamMember[];
   createdAt?: Date | string;
   updatedAt?: Date | string;
 }
@@ -9,6 +10,7 @@ export interface Department {
 export interface Location {
   id: number;
   name: string;
+  members?: TeamMember[];
 }
 
 export interface TeamMember {
