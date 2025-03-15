@@ -23,7 +23,7 @@ interface TeamContextType {
   importTeamMembers: (members: any[]) => Promise<any>;
   getTeamMember: (id: number) => any;
   getDirectReports: (managerId: number) => any[];
-  importTeamMembersFromCSV: (csvText: string) => { imported: number };
+  importTeamMembersFromCSV: (csvText: string) => Promise<{ imported: number }>;
 }
 
 const TeamContext = createContext<TeamContextType | undefined>(undefined);
@@ -119,7 +119,7 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const importTeamMembersFromCSV = (csvText: string) => {
+  const importTeamMembersFromCSV = async (csvText: string) => {
     try {
       // Analyser le CSV
       const lines = csvText.trim().split("\n");
@@ -133,10 +133,10 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({
         if (!line) continue; // Ignorer les lignes vides
 
         const values = line.split(",").map((v) => v.trim());
-        const member: any = {};
+        const rawMember: any = {};
 
         // Associer les valeurs aux noms de colonnes
-        for (let j = 0; j < headers.length; j++) {
+        for (let j = 0; j < Math.min(headers.length, values.length); j++) {
           let key = headers[j];
           let value = values[j];
 
@@ -149,15 +149,48 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({
             value = value ? parseInt(value) : null;
           }
 
-          member[key] = value;
+          rawMember[key] = value;
         }
 
-        members.push(member);
+        // Créer un objet membre avec les noms de champs corrects
+        const member: any = {
+          // Mappings obligatoires
+          firstname: rawMember.firstName || rawMember.firstname,
+          lastname: rawMember.lastName || rawMember.lastname,
+          professionnalEmail:
+            rawMember.professionnalEmail ||
+            rawMember.professionalemail ||
+            rawMember.email,
+          jobDescription: rawMember.jobDescription,
+          managementCategory:
+            rawMember.managementCategory || "Individual Contributor", // Valeur par défaut
+          serviceAssignmentCode: rawMember.serviceAssignmentCode || `EMP-${i}`, // Valeur par défaut
+
+          // Mappings optionnels
+          gender: rawMember.gender,
+          departmentId: rawMember.departmentId,
+          managerId: rawMember.managerId,
+          locationId: rawMember.locationId,
+          photo: rawMember.imageUrl || rawMember.photo,
+          birthDate: rawMember.birthday || rawMember.birthDate,
+          startDate:
+            rawMember.startDate || new Date().toISOString().split("T")[0],
+        };
+
+        // Vérifier que les champs obligatoires sont présents
+        if (member.firstname && member.lastname && member.professionnalEmail) {
+          members.push(member);
+        } else {
+          console.warn(
+            `Ligne ${i} ignorée : données obligatoires manquantes`,
+            rawMember
+          );
+        }
       }
 
-      // Si des membres ont été trouvés, les importer
+      // Si des membres ont été trouvés, les importer (et ATTENDRE que l'opération soit terminée)
       if (members.length > 0) {
-        importTeamMembers(members);
+        await importTeamMembers(members);
       }
 
       return { imported: members.length };
