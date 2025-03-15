@@ -23,6 +23,7 @@ interface TeamContextType {
   importTeamMembers: (members: any[]) => Promise<any>;
   getTeamMember: (id: number) => any;
   getDirectReports: (managerId: number) => any[];
+  importTeamMembersFromCSV: (csvText: string) => { imported: number };
 }
 
 const TeamContext = createContext<TeamContextType | undefined>(undefined);
@@ -118,6 +119,54 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const importTeamMembersFromCSV = (csvText: string) => {
+    try {
+      // Analyser le CSV
+      const lines = csvText.trim().split("\n");
+      const headers = lines[0].split(",").map((h) => h.trim());
+
+      const members = [];
+
+      // Parcourir chaque ligne (sauf l'en-tête)
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue; // Ignorer les lignes vides
+
+        const values = line.split(",").map((v) => v.trim());
+        const member: any = {};
+
+        // Associer les valeurs aux noms de colonnes
+        for (let j = 0; j < headers.length; j++) {
+          let key = headers[j];
+          let value = values[j];
+
+          // Convertir les valeurs si nécessaire
+          if (
+            key === "departmentId" ||
+            key === "locationId" ||
+            key === "managerId"
+          ) {
+            value = value ? parseInt(value) : null;
+          }
+
+          member[key] = value;
+        }
+
+        members.push(member);
+      }
+
+      // Si des membres ont été trouvés, les importer
+      if (members.length > 0) {
+        importTeamMembers(members);
+      }
+
+      return { imported: members.length };
+    } catch (error) {
+      console.error("Error parsing CSV:", error);
+      throw new Error("Failed to parse CSV file. Please check the format.");
+    }
+  };
+
   const getTeamMember = (id: number) => {
     return teamMembers.find((member) => member.id === id) || null;
   };
@@ -143,6 +192,7 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({
         importTeamMembers,
         getTeamMember,
         getDirectReports,
+        importTeamMembersFromCSV,
       }}
     >
       {children}
