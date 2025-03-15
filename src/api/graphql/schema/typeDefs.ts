@@ -29,7 +29,7 @@ export const typeDefs = gql`
     directReports: [TeamMember!]
     locationId: Int
     location: Location
-    photo: String
+    imageUrl: String
     phoneNumber: String
     birthDate: String
     startDate: String
@@ -57,7 +57,7 @@ export const typeDefs = gql`
     departmentId: Int
     managerId: Int
     locationId: Int
-    photo: String
+    imageUrl: String
     phoneNumber: String
     birthDate: String
     startDate: String
@@ -74,7 +74,7 @@ export const typeDefs = gql`
     departmentId: Int
     managerId: Int
     locationId: Int
-    photo: String
+    imageUrl: String
     phoneNumber: String
     birthDate: String
     startDate: String
@@ -97,5 +97,10 @@ export const typeDefs = gql`
     createLocation(data: LocationCreateInput!): Location!
     deleteLocation(id: Int!): Location!
     importTeamMembers(members: [TeamMemberCreateInput!]!): [TeamMember!]!
+    uploadMemberImage(imageData: String!): UploadResult!
   }
+
+  type UploadResult {
+  url: String!
+}
 `;

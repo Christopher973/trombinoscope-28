@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useTeam } from "@/context/TeamContext";
 import { TeamMember, Department, Location } from "@/types";
 import { toast } from "@/hooks/use-toast";
-import { X } from "lucide-react";
+import { Upload, X } from "lucide-react";
 
 interface MemberFormProps {
   memberId?: number;
@@ -15,8 +15,13 @@ const MemberForm: React.FC<MemberFormProps> = ({
   onSuccess,
   onCancel,
 }) => {
-  const { teamMembers, createTeamMember, updateTeamMember, getTeamMember } =
-    useTeam();
+  const {
+    teamMembers,
+    createTeamMember,
+    updateTeamMember,
+    getTeamMember,
+    uploadImage,
+  } = useTeam();
 
   const [formData, setFormData] = useState<Omit<TeamMember, "id">>({
     firstname: "",
@@ -100,26 +105,49 @@ const MemberForm: React.FC<MemberFormProps> = ({
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setImageFile(file);
+
+      // Créer une prévisualisation
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const cleanedData = {
-      firstname: formData.firstname,
-      lastname: formData.lastname,
-      gender: formData.gender,
-      professionnalEmail: formData.professionnalEmail,
-      jobDescription: formData.jobDescription,
-      managementCategory: formData.managementCategory,
-      serviceAssignmentCode: formData.serviceAssignmentCode,
-      departmentId: formData.departmentId,
-      managerId: formData.managerId || null,
-      locationId: formData.locationId,
-      photo: formData.imageUrl, // Renommer imageUrl en photo si c'est le nom attendu
-      birthDate: formData.birthday, // Renommer birthday en birthDate
-      startDate: formData.startDate,
-    };
-
     try {
+      // Si une nouvelle image a été sélectionnée, l'uploader d'abord
+      let imageUrl = formData.imageUrl;
+      if (imagePreview && imagePreview !== formData.imageUrl) {
+        imageUrl = await uploadImage(imagePreview);
+      }
+
+      const cleanedData = {
+        imageUrl: imageUrl,
+        firstname: formData.firstname,
+        lastname: formData.lastname,
+        gender: formData.gender,
+        professionnalEmail: formData.professionnalEmail,
+        jobDescription: formData.jobDescription,
+        managementCategory: formData.managementCategory,
+        serviceAssignmentCode: formData.serviceAssignmentCode,
+        departmentId: formData.departmentId,
+        managerId: formData.managerId || null,
+        locationId: formData.locationId,
+        birthDate: formData.birthday,
+        startDate: formData.startDate,
+      };
+
       if (isEditing && memberId) {
         updateTeamMember(memberId, cleanedData);
       } else {
@@ -335,13 +363,34 @@ const MemberForm: React.FC<MemberFormProps> = ({
           <label className="block text-sm font-medium mb-1">
             Profile Image URL
           </label>
-          <input
-            type="text"
-            name="imageUrl"
-            value={formData.imageUrl || ""}
-            onChange={handleChange}
-            className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
-          />
+          <div className="flex items-center gap-4">
+            <div className="w-24 h-24 border border-border rounded-md overflow-hidden">
+              <img
+                src={imagePreview || formData.imageUrl || "/placeholder.svg"}
+                alt="Member preview"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="flex-1">
+              <label
+                htmlFor="image-upload"
+                className="inline-flex items-center px-3 py-2 border border-border rounded-md cursor-pointer bg-background hover:bg-secondary/50 transition-colors"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Choisir une image
+                <input
+                  id="image-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+              </label>
+              <p className="text-xs text-muted-foreground mt-1">
+                Formats acceptés: JPG, PNG, GIF (max. 5MB)
+              </p>
+            </div>
+          </div>
         </div>
 
         <div>

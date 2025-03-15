@@ -8,6 +8,7 @@ import {
   UPDATE_TEAM_MEMBER,
   DELETE_TEAM_MEMBER,
   IMPORT_TEAM_MEMBERS,
+  UPLOAD_MEMBER_IMAGE,
 } from "../api/graphql/queries";
 
 // Types à adapter selon vos besoins actuels
@@ -24,6 +25,7 @@ interface TeamContextType {
   getTeamMember: (id: number) => any;
   getDirectReports: (managerId: number) => any[];
   importTeamMembersFromCSV: (csvText: string) => Promise<{ imported: number }>;
+  uploadImage: (base64Image: string) => Promise<string>;
 }
 
 const TeamContext = createContext<TeamContextType | undefined>(undefined);
@@ -208,6 +210,20 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({
     return teamMembers.filter((member) => member.managerId === managerId) || [];
   };
 
+  const [uploadMemberImage] = useMutation(UPLOAD_MEMBER_IMAGE);
+
+  const uploadImage = async (base64Image: string) => {
+    try {
+      const { data } = await uploadMemberImage({
+        variables: { imageData: base64Image },
+      });
+      return data.uploadMemberImage.url;
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      throw error;
+    }
+  };
+
   const loading = membersLoading || deptsLoading || locsLoading;
   const error = membersError;
 
@@ -226,6 +242,7 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({
         getTeamMember,
         getDirectReports,
         importTeamMembersFromCSV,
+        uploadImage,
       }}
     >
       {children}

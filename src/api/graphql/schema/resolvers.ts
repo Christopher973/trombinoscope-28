@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { uploadImage } from '../../../services/uploadImage';
 
 const prisma = new PrismaClient();
 
@@ -49,6 +50,15 @@ export const resolvers = {
       }
       return createdMembers;
     },
+    uploadMemberImage: async (_, { imageData }) => {
+    try {
+      const imageUrl = await uploadImage(imageData);
+      return { url: imageUrl };
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      throw new Error('Failed to upload image');
+    }
+  },
   },
   
   Department: {
@@ -81,7 +91,6 @@ function transformDataForPrisma(data, isUpdate = false) {
   delete result.department;
   delete result.location;
   delete result.manager;
-  delete result.imageUrl;
   delete result.birthday;
   delete result.createdAt;
   delete result.updatedAt;
@@ -94,6 +103,11 @@ function transformDataForPrisma(data, isUpdate = false) {
     } catch (error) {
       console.error(`Erreur lors de la conversion de startDate: ${result.startDate}`, error);
     }
+  }
+
+  if (result.photo) {
+    result.imageUrl = result.photo;
+    delete result.photo;
   }
 
   if (result.birthDate) {
@@ -149,12 +163,6 @@ function transformDataForPrisma(data, isUpdate = false) {
       result.manager = { connect: { id: result.managerId } };
     }
     delete result.managerId;
-  }
-  
-  // Renommer photo en imageUrl si nécessaire
-  if (result.photo) {
-    result.imageUrl = result.photo;
-    delete result.photo;
   }
   
   // Renommer birthDate en birthday si nécessaire

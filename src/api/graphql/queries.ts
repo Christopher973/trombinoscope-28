@@ -14,7 +14,7 @@ export const TEAM_MEMBER_FRAGMENT = gql`
     departmentId
     managerId
     locationId
-    photo
+    imageUrl
     phoneNumber
     birthDate
     startDate
@@ -137,6 +137,14 @@ export const IMPORT_TEAM_MEMBERS = gql`
       id
       firstname
       lastname
+    }
+  }
+`;
+
+export const UPLOAD_MEMBER_IMAGE = gql`
+  mutation UploadMemberImage($imageData: String!) {
+    uploadMemberImage(imageData: $imageData) {
+      url
     }
   }
 `;
