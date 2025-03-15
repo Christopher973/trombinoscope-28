@@ -21,6 +21,8 @@ interface TeamContextType {
   updateTeamMember: (id: number, data: any) => Promise<any>;
   deleteTeamMember: (id: number) => Promise<any>;
   importTeamMembers: (members: any[]) => Promise<any>;
+  getTeamMember: (id: number) => any;
+  getDirectReports: (managerId: number) => any[];
 }
 
 const TeamContext = createContext<TeamContextType | undefined>(undefined);
@@ -116,6 +118,14 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const getTeamMember = (id: number) => {
+    return teamMembers.find((member) => member.id === id) || null;
+  };
+
+  const getDirectReports = (managerId: number) => {
+    return teamMembers.filter((member) => member.managerId === managerId) || [];
+  };
+
   const loading = membersLoading || deptsLoading || locsLoading;
   const error = membersError;
 
@@ -131,6 +141,8 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({
         updateTeamMember,
         deleteTeamMember,
         importTeamMembers,
+        getTeamMember,
+        getDirectReports,
       }}
     >
       {children}
