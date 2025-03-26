@@ -1,9 +1,8 @@
-
-import React, { useState, useEffect } from 'react';
-import { useTeam } from '@/context/TeamContext';
-import { TeamMember, Department, Location } from '@/types';
-import { toast } from '@/hooks/use-toast';
-import { X } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import { useTeam } from "@/context/TeamContext";
+import { TeamMember, Department, Location } from "@/types";
+import { toast } from "@/hooks/use-toast";
+import { Upload, X } from "lucide-react";
 
 interface MemberFormProps {
   memberId?: number;
@@ -11,33 +10,39 @@ interface MemberFormProps {
   onCancel?: () => void;
 }
 
-const MemberForm: React.FC<MemberFormProps> = ({ 
+const MemberForm: React.FC<MemberFormProps> = ({
   memberId,
   onSuccess,
-  onCancel
+  onCancel,
 }) => {
-  const { teamMembers, addTeamMember, updateTeamMember, getTeamMember } = useTeam();
-  
-  const [formData, setFormData] = useState<Omit<TeamMember, 'id'>>({
-    firstname: '',
-    lastname: '',
-    gender: '',
-    professionnalEmail: '',
-    jobDescription: '',
-    managementCategory: '',
-    serviceAssignmentCode: '',
+  const {
+    teamMembers,
+    createTeamMember,
+    updateTeamMember,
+    getTeamMember,
+    uploadImage,
+  } = useTeam();
+
+  const [formData, setFormData] = useState<Omit<TeamMember, "id">>({
+    firstname: "",
+    lastname: "",
+    gender: "",
+    professionnalEmail: "",
+    jobDescription: "",
+    managementCategory: "",
+    serviceAssignmentCode: "",
     departmentId: undefined,
     department: undefined,
     managerId: null,
     locationId: undefined,
     location: undefined,
-    imageUrl: 'https://i.pravatar.cc/300',
-    startDate: new Date().toISOString().split('T')[0],
-    birthday: '',
+    imageUrl: "https://i.pravatar.cc/300",
+    startDate: new Date().toISOString().split("T")[0],
+    birthday: "",
     createdAt: new Date(),
-    updatedAt: new Date()
+    updatedAt: new Date(),
   });
-  
+
   // If editing, load the member data
   useEffect(() => {
     if (memberId) {
@@ -48,52 +53,107 @@ const MemberForm: React.FC<MemberFormProps> = ({
       }
     }
   }, [memberId, getTeamMember]);
-  
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
-  
+
   const handleManagerChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
-    setFormData(prev => ({ 
-      ...prev, 
-      managerId: value === '' ? null : Number(value) 
+    setFormData((prev) => ({
+      ...prev,
+      managerId: value === "" ? null : Number(value),
     }));
   };
-  
+
   const handleDepartmentChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
-    if (value === '') {
-      setFormData(prev => ({ ...prev, departmentId: undefined, department: undefined }));
+    if (value === "") {
+      setFormData((prev) => ({
+        ...prev,
+        departmentId: undefined,
+        department: undefined,
+      }));
     } else {
       const departmentId = Number(value);
-      const department = teamMembers.find(m => m.departmentId === departmentId)?.department;
-      setFormData(prev => ({ ...prev, departmentId, department }));
+      const department = teamMembers.find(
+        (m) => m.departmentId === departmentId
+      )?.department;
+      setFormData((prev) => ({ ...prev, departmentId, department }));
     }
   };
-  
+
   const handleLocationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
-    if (value === '') {
-      setFormData(prev => ({ ...prev, locationId: undefined, location: undefined }));
+    if (value === "") {
+      setFormData((prev) => ({
+        ...prev,
+        locationId: undefined,
+        location: undefined,
+      }));
     } else {
       const locationId = Number(value);
-      const location = teamMembers.find(m => m.locationId === locationId)?.location;
-      setFormData(prev => ({ ...prev, locationId, location }));
+      const location = teamMembers.find(
+        (m) => m.locationId === locationId
+      )?.location;
+      setFormData((prev) => ({ ...prev, locationId, location }));
     }
   };
-  
-  const handleSubmit = (e: React.FormEvent) => {
+
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setImageFile(file);
+
+      // Créer une prévisualisation
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
-      if (isEditing && memberId) {
-        updateTeamMember({ id: memberId, ...formData });
-      } else {
-        addTeamMember(formData);
+      // Si une nouvelle image a été sélectionnée, l'uploader d'abord
+      let imageUrl = formData.imageUrl;
+      if (imagePreview && imagePreview !== formData.imageUrl) {
+        imageUrl = await uploadImage(imagePreview);
       }
-      
+
+      const cleanedData = {
+        imageUrl: imageUrl,
+        firstname: formData.firstname,
+        lastname: formData.lastname,
+        gender: formData.gender,
+        professionnalEmail: formData.professionnalEmail,
+        jobDescription: formData.jobDescription,
+        managementCategory: formData.managementCategory,
+        serviceAssignmentCode: formData.serviceAssignmentCode,
+        departmentId: formData.departmentId,
+        managerId: formData.managerId || null,
+        locationId: formData.locationId,
+        birthDate: formData.birthday,
+        startDate: formData.startDate,
+      };
+
+      if (isEditing && memberId) {
+        updateTeamMember(memberId, cleanedData);
+      } else {
+        createTeamMember(cleanedData);
+      }
+
       if (onSuccess) {
         onSuccess();
       }
@@ -106,19 +166,23 @@ const MemberForm: React.FC<MemberFormProps> = ({
       console.error(error);
     }
   };
-  
+
   const isEditing = !!memberId;
-  
+
   // Get unique departments and locations for dropdowns
-  const departments = [...new Set(teamMembers.map(m => m.department).filter(Boolean))];
-  const locations = [...new Set(teamMembers.map(m => m.location).filter(Boolean))];
-  
+  const departments = [
+    ...new Set(teamMembers.map((m) => m.department).filter(Boolean)),
+  ];
+  const locations = [
+    ...new Set(teamMembers.map((m) => m.location).filter(Boolean)),
+  ];
+
   return (
     <div className="animate-fade-in">
       <h2 className="text-xl font-semibold mb-4">
-        {isEditing ? 'Edit Team Member' : 'Add New Team Member'}
+        {isEditing ? "Edit Team Member" : "Add New Team Member"}
       </h2>
-      
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -132,7 +196,7 @@ const MemberForm: React.FC<MemberFormProps> = ({
               required
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium mb-1">Last Name</label>
             <input
@@ -144,9 +208,11 @@ const MemberForm: React.FC<MemberFormProps> = ({
               required
             />
           </div>
-          
+
           <div>
-            <label className="block text-sm font-medium mb-1">Professional Email</label>
+            <label className="block text-sm font-medium mb-1">
+              Professional Email
+            </label>
             <input
               type="email"
               name="professionnalEmail"
@@ -156,12 +222,12 @@ const MemberForm: React.FC<MemberFormProps> = ({
               required
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium mb-1">Gender</label>
             <select
               name="gender"
-              value={formData.gender || ''}
+              value={formData.gender || ""}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
             >
@@ -171,9 +237,11 @@ const MemberForm: React.FC<MemberFormProps> = ({
               <option value="Other">Other</option>
             </select>
           </div>
-          
+
           <div>
-            <label className="block text-sm font-medium mb-1">Job Description</label>
+            <label className="block text-sm font-medium mb-1">
+              Job Description
+            </label>
             <input
               type="text"
               name="jobDescription"
@@ -183,9 +251,11 @@ const MemberForm: React.FC<MemberFormProps> = ({
               required
             />
           </div>
-          
+
           <div>
-            <label className="block text-sm font-medium mb-1">Management Category</label>
+            <label className="block text-sm font-medium mb-1">
+              Management Category
+            </label>
             <select
               name="managementCategory"
               value={formData.managementCategory}
@@ -194,72 +264,90 @@ const MemberForm: React.FC<MemberFormProps> = ({
               required
             >
               <option value="">Select Category</option>
-              <option value="Individual Contributor">Individual Contributor</option>
+              <option value="Individual Contributor">
+                Individual Contributor
+              </option>
               <option value="Management">Management</option>
               <option value="Executive">Executive</option>
             </select>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium mb-1">Department</label>
             <select
               name="departmentId"
-              value={formData.departmentId || ''}
+              value={formData.departmentId || ""}
               onChange={handleDepartmentChange}
               className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
             >
               <option value="">Select Department</option>
-              {departments.map(dept => dept && (
-                <option key={dept.id} value={dept.id}>
-                  {dept.name}
-                </option>
-              ))}
+              {departments.map(
+                (dept) =>
+                  dept && (
+                    <option key={dept.id} value={dept.id}>
+                      {dept.name}
+                    </option>
+                  )
+              )}
             </select>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium mb-1">Location</label>
             <select
               name="locationId"
-              value={formData.locationId || ''}
+              value={formData.locationId || ""}
               onChange={handleLocationChange}
               className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
             >
               <option value="">Select Location</option>
-              {locations.map(loc => loc && (
-                <option key={loc.id} value={loc.id}>
-                  {loc.name}
-                </option>
-              ))}
+              {locations.map(
+                (loc) =>
+                  loc && (
+                    <option key={loc.id} value={loc.id}>
+                      {loc.name}
+                    </option>
+                  )
+              )}
             </select>
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium mb-1">Start Date</label>
             <input
               type="date"
               name="startDate"
-              value={typeof formData.startDate === 'string' ? formData.startDate.split('T')[0] : ''}
+              value={
+                typeof formData.startDate === "string"
+                  ? formData.startDate.split("T")[0]
+                  : ""
+              }
               onChange={handleChange}
               className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
               required
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium mb-1">Birthday</label>
             <input
               type="date"
               name="birthday"
-              value={typeof formData.birthday === 'string' ? formData.birthday.split('T')[0] : ''}
+              value={
+                typeof formData.birthday === "string"
+                  ? formData.birthday.split("T")[0]
+                  : ""
+              }
               onChange={handleChange}
               className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
               required
             />
           </div>
-          
+
           <div>
-            <label className="block text-sm font-medium mb-1">Service Assignment Code</label>
+            <label className="block text-sm font-medium mb-1">
+              Service Assignment Code
+            </label>
             <input
               type="text"
               name="serviceAssignmentCode"
@@ -270,38 +358,61 @@ const MemberForm: React.FC<MemberFormProps> = ({
             />
           </div>
         </div>
-        
+
         <div>
-          <label className="block text-sm font-medium mb-1">Profile Image URL</label>
-          <input
-            type="text"
-            name="imageUrl"
-            value={formData.imageUrl || ''}
-            onChange={handleChange}
-            className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
-          />
+          <label className="block text-sm font-medium mb-1">
+            Profile Image URL
+          </label>
+          <div className="flex items-center gap-4">
+            <div className="w-24 h-24 border border-border rounded-md overflow-hidden">
+              <img
+                src={imagePreview || formData.imageUrl || "/placeholder.svg"}
+                alt="Member preview"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="flex-1">
+              <label
+                htmlFor="image-upload"
+                className="inline-flex items-center px-3 py-2 border border-border rounded-md cursor-pointer bg-background hover:bg-secondary/50 transition-colors"
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Choisir une image
+                <input
+                  id="image-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+              </label>
+              <p className="text-xs text-muted-foreground mt-1">
+                Formats acceptés: JPG, PNG, GIF (max. 5MB)
+              </p>
+            </div>
+          </div>
         </div>
-        
+
         <div>
           <label className="block text-sm font-medium mb-1">Manager</label>
           <select
             name="managerId"
-            value={formData.managerId === null ? '' : formData.managerId}
+            value={formData.managerId === null ? "" : formData.managerId}
             onChange={handleManagerChange}
             className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
           >
             <option value="">No Manager (Top Level)</option>
             {teamMembers
-              .filter(m => m.id !== memberId) // Can't be your own manager
-              .map(manager => (
+              .filter((m) => m.id !== memberId) // Can't be your own manager
+              .map((manager) => (
                 <option key={manager.id} value={manager.id}>
-                  {manager.firstname} {manager.lastname} - {manager.jobDescription}
+                  {manager.firstname} {manager.lastname} -{" "}
+                  {manager.jobDescription}
                 </option>
-              ))
-            }
+              ))}
           </select>
         </div>
-        
+
         <div className="flex justify-end space-x-2 pt-4">
           {onCancel && (
             <button
@@ -312,12 +423,12 @@ const MemberForm: React.FC<MemberFormProps> = ({
               Cancel
             </button>
           )}
-          
+
           <button
             type="submit"
             className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
           >
-            {isEditing ? 'Update Member' : 'Add Member'}
+            {isEditing ? "Update Member" : "Add Member"}
           </button>
         </div>
       </form>
