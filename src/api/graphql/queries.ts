@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client';
+import { gql } from "@apollo/client";
 
 // Fragments pour réutiliser des portions de requêtes
 export const TEAM_MEMBER_FRAGMENT = gql`
@@ -16,7 +16,7 @@ export const TEAM_MEMBER_FRAGMENT = gql`
     locationId
     imageUrl
     phoneNumber
-    birthDate
+    birthday
     startDate
   }
 `;

@@ -144,7 +144,7 @@ const MemberForm: React.FC<MemberFormProps> = ({
         departmentId: formData.departmentId,
         managerId: formData.managerId || null,
         locationId: formData.locationId,
-        birthDate: formData.birthday,
+        birthday: formData.birthday,
         startDate: formData.startDate,
       };
 

@@ -139,7 +139,7 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({
 
         // Associer les valeurs aux noms de colonnes
         for (let j = 0; j < Math.min(headers.length, values.length); j++) {
-          let key = headers[j];
+          const key = headers[j];
           let value = values[j];
 
           // Convertir les valeurs si nécessaire
@@ -174,7 +174,7 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({
           managerId: rawMember.managerId,
           locationId: rawMember.locationId,
           photo: rawMember.imageUrl || rawMember.photo,
-          birthDate: rawMember.birthday || rawMember.birthDate,
+          birthday: rawMember.birthday || rawMember.birthDate,
           startDate:
             rawMember.startDate || new Date().toISOString().split("T")[0],
         };

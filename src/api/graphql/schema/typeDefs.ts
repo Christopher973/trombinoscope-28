@@ -1,4 +1,4 @@
-import gql from 'graphql-tag';
+import gql from "graphql-tag";
 
 export const typeDefs = gql`
   type Department {
@@ -31,7 +31,7 @@ export const typeDefs = gql`
     location: Location
     imageUrl: String
     phoneNumber: String
-    birthDate: String
+    birthday: String
     startDate: String
   }
 
@@ -59,7 +59,7 @@ export const typeDefs = gql`
     locationId: Int
     imageUrl: String
     phoneNumber: String
-    birthDate: String
+    birthday: String
     startDate: String
   }
 
@@ -76,7 +76,7 @@ export const typeDefs = gql`
     locationId: Int
     imageUrl: String
     phoneNumber: String
-    birthDate: String
+    birthday: String
     startDate: String
   }
 
@@ -101,6 +101,6 @@ export const typeDefs = gql`
   }
 
   type UploadResult {
-  url: String!
-}
+    url: String!
+  }
 `;

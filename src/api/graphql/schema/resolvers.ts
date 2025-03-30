@@ -1,5 +1,5 @@
-import { PrismaClient } from '@prisma/client';
-import { uploadImage } from '../../../services/uploadImage';
+import { PrismaClient } from "@prisma/client";
+import { uploadImage } from "../../../services/uploadImage";
 
 const prisma = new PrismaClient();
 
@@ -11,12 +11,12 @@ export const resolvers = {
     location: (_, { id }) => prisma.location.findUnique({ where: { id } }),
     teamMembers: () => prisma.teamMember.findMany(),
     teamMember: (_, { id }) => prisma.teamMember.findUnique({ where: { id } }),
-    teamMembersByDepartment: (_, { departmentId }) => 
+    teamMembersByDepartment: (_, { departmentId }) =>
       prisma.teamMember.findMany({ where: { departmentId } }),
-    teamMembersByManager: (_, { managerId }) => 
+    teamMembersByManager: (_, { managerId }) =>
       prisma.teamMember.findMany({ where: { managerId } }),
   },
-  
+
   Mutation: {
     createTeamMember: (_, { data }) => {
       // Transformation des données pour Prisma (false = création)
@@ -26,59 +26,64 @@ export const resolvers = {
     updateTeamMember: (_, { id, data }) => {
       // Transformation des données pour Prisma (true = mise à jour)
       const prismaData = transformDataForPrisma(data, true);
-      return prisma.teamMember.update({ 
+      return prisma.teamMember.update({
         where: { id },
-        data: prismaData
+        data: prismaData,
       });
     },
-    deleteTeamMember: (_, { id }) => 
+    deleteTeamMember: (_, { id }) =>
       prisma.teamMember.delete({ where: { id } }),
-    createDepartment: (_, { data }) => 
-      prisma.department.create({ data }),
-    deleteDepartment: (_, { id }) => 
+    createDepartment: (_, { data }) => prisma.department.create({ data }),
+    deleteDepartment: (_, { id }) =>
       prisma.department.delete({ where: { id } }),
-    createLocation: (_, { data }) => 
-      prisma.location.create({ data }),
-    deleteLocation: (_, { id }) => 
-      prisma.location.delete({ where: { id } }),
+    createLocation: (_, { data }) => prisma.location.create({ data }),
+    deleteLocation: (_, { id }) => prisma.location.delete({ where: { id } }),
     importTeamMembers: async (_, { members }) => {
       const createdMembers = [];
       for (const member of members) {
         const prismaData = transformDataForPrisma(member, false);
-        const createdMember = await prisma.teamMember.create({ data: prismaData });
+        const createdMember = await prisma.teamMember.create({
+          data: prismaData,
+        });
         createdMembers.push(createdMember);
       }
       return createdMembers;
     },
     uploadMemberImage: async (_, { imageData }) => {
-    try {
-      const imageUrl = await uploadImage(imageData);
-      return { url: imageUrl };
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      throw new Error('Failed to upload image');
-    }
+      try {
+        const imageUrl = await uploadImage(imageData);
+        return { url: imageUrl };
+      } catch (error) {
+        console.error("Error uploading image:", error);
+        throw new Error("Failed to upload image");
+      }
+    },
   },
-  },
-  
+
   Department: {
-    teamMembers: (parent) => 
+    teamMembers: (parent) =>
       prisma.department.findUnique({ where: { id: parent.id } }).teamMembers(),
   },
-  
+
   Location: {
-    teamMembers: (parent) => 
+    teamMembers: (parent) =>
       prisma.location.findUnique({ where: { id: parent.id } }).teamMembers(),
   },
-  
+
   TeamMember: {
-    department: (parent) => 
-      parent.departmentId ? prisma.department.findUnique({ where: { id: parent.departmentId } }) : null,
-    location: (parent) => 
-      parent.locationId ? prisma.location.findUnique({ where: { id: parent.locationId } }) : null,
-    manager: (parent) => 
-      parent.managerId ? prisma.teamMember.findUnique({ where: { id: parent.managerId } }) : null,
-    directReports: (parent) => 
+    department: (parent) =>
+      parent.departmentId
+        ? prisma.department.findUnique({ where: { id: parent.departmentId } })
+        : null,
+    location: (parent) =>
+      parent.locationId
+        ? prisma.location.findUnique({ where: { id: parent.locationId } })
+        : null,
+    manager: (parent) =>
+      parent.managerId
+        ? prisma.teamMember.findUnique({ where: { id: parent.managerId } })
+        : null,
+    directReports: (parent) =>
       prisma.teamMember.findMany({ where: { managerId: parent.id } }),
   },
 };
@@ -86,12 +91,11 @@ export const resolvers = {
 // Fonction utilitaire pour transformer les données au format attendu par Prisma
 function transformDataForPrisma(data, isUpdate = false) {
   const result = { ...data };
-  
+
   // Supprimer les champs qui ne sont pas dans le schéma Prisma
   delete result.department;
   delete result.location;
   delete result.manager;
-  delete result.birthday;
   delete result.createdAt;
   delete result.updatedAt;
 
@@ -99,9 +103,14 @@ function transformDataForPrisma(data, isUpdate = false) {
   if (result.startDate) {
     try {
       // Convertir la date simple en format ISO-8601 DateTime complet
-      result.startDate = new Date(result.startDate + 'T00:00:00Z').toISOString();
+      result.startDate = new Date(
+        result.startDate + "T00:00:00Z"
+      ).toISOString();
     } catch (error) {
-      console.error(`Erreur lors de la conversion de startDate: ${result.startDate}`, error);
+      console.error(
+        `Erreur lors de la conversion de startDate: ${result.startDate}`,
+        error
+      );
     }
   }
 
@@ -110,13 +119,28 @@ function transformDataForPrisma(data, isUpdate = false) {
     delete result.photo;
   }
 
-  if (result.birthDate) {
+  if (result.birthday) {
     try {
       // Convertir la date simple en format ISO-8601 DateTime complet
-      result.birthday = new Date(result.birthDate + 'T00:00:00Z').toISOString();
+      result.birthday = new Date(result.birthday + "T00:00:00Z").toISOString();
+    } catch (error) {
+      console.error(
+        `Erreur lors de la conversion de birthday: ${result.birthday}`,
+        error
+      );
+    }
+  }
+
+  // Convertir birthDate en birthday si présent
+  if (result.birthDate) {
+    try {
+      result.birthday = new Date(result.birthDate + "T00:00:00Z").toISOString();
       delete result.birthDate;
     } catch (error) {
-      console.error(`Erreur lors de la conversion de birthDate: ${result.birthDate}`, error);
+      console.error(
+        `Erreur lors de la conversion de birthDate: ${result.birthDate}`,
+        error
+      );
     }
   }
 
@@ -164,7 +188,7 @@ function transformDataForPrisma(data, isUpdate = false) {
     }
     delete result.managerId;
   }
-  
+
   // Renommer birthDate en birthday si nécessaire
   if (result.birthDate) {
     result.birthday = result.birthDate;
