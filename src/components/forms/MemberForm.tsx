@@ -132,6 +132,76 @@ const MemberForm: React.FC<MemberFormProps> = ({
         imageUrl = await uploadImage(imagePreview);
       }
 
+      // Fonction révisée pour le formatage des dates au format ISO-8601 standard
+      const formatDateForSubmit = (
+        dateValue: string | Date | number | undefined
+      ) => {
+        if (!dateValue) return null;
+
+        try {
+          let date: Date;
+
+          // Cas 1: C'est un nombre (timestamp)
+          if (
+            typeof dateValue === "number" ||
+            (typeof dateValue === "string" && !isNaN(Number(dateValue)))
+          ) {
+            const timestamp =
+              typeof dateValue === "string" ? Number(dateValue) : dateValue;
+            date = new Date(timestamp);
+            if (isNaN(date.getTime())) {
+              console.error(`Timestamp invalide: ${dateValue}`);
+              return null;
+            }
+          }
+          // Cas 2: C'est déjà un objet Date
+          else if (dateValue instanceof Date) {
+            date = dateValue;
+          }
+          // Cas 3: C'est une chaîne au format YYYY-MM-DD
+          else if (
+            typeof dateValue === "string" &&
+            dateValue.match(/^\d{4}-\d{2}-\d{2}$/)
+          ) {
+            // Pour éviter les problèmes de timezone, on utilise ce format
+            date = new Date(`${dateValue}T12:00:00Z`);
+            if (isNaN(date.getTime())) {
+              console.error(`Date invalide: ${dateValue}`);
+              return null;
+            }
+          }
+          // Cas 4: Autres formats de chaîne de date
+          else if (
+            typeof dateValue === "string" &&
+            !isNaN(Date.parse(dateValue))
+          ) {
+            date = new Date(dateValue);
+          } else {
+            console.error(
+              `Format de date non reconnu: ${dateValue} (type: ${typeof dateValue})`
+            );
+            return null;
+          }
+
+          // Utiliser directement le format ISO-8601 standard (qui est ce que toISOString() produit)
+          const isoDate = date.toISOString();
+          console.log(`Date convertie: ${dateValue} -> ${isoDate}`);
+
+          return isoDate;
+        } catch (error) {
+          console.error(
+            `Erreur lors du formatage de la date: ${dateValue}`,
+            error
+          );
+          return null;
+        }
+      };
+
+      const birthday = formatDateForSubmit(formData.birthday);
+      const startDate = formatDateForSubmit(formData.startDate);
+
+      console.log("Dates formatées:", { birthday, startDate });
+
       const cleanedData = {
         imageUrl: imageUrl,
         firstname: formData.firstname,
@@ -144,9 +214,18 @@ const MemberForm: React.FC<MemberFormProps> = ({
         departmentId: formData.departmentId,
         managerId: formData.managerId || null,
         locationId: formData.locationId,
-        birthDate: formData.birthday,
-        startDate: formData.startDate,
+        birthday: birthday,
+        startDate: startDate,
       };
+
+      // Vérifier que les dates sont dans un format valide avant soumission
+      if (formData.birthday && !cleanedData.birthday) {
+        throw new Error("Format de date d'anniversaire invalide");
+      }
+
+      if (formData.startDate && !cleanedData.startDate) {
+        throw new Error("Format de date de début invalide");
+      }
 
       if (isEditing && memberId) {
         updateTeamMember(memberId, cleanedData);
@@ -159,11 +238,14 @@ const MemberForm: React.FC<MemberFormProps> = ({
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to save team member",
+        title: "Erreur",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Échec de l'enregistrement du membre",
         variant: "destructive",
       });
-      console.error(error);
+      console.error("Erreur lors de la soumission:", error);
     }
   };
 
@@ -176,6 +258,43 @@ const MemberForm: React.FC<MemberFormProps> = ({
   const locations = [
     ...new Set(teamMembers.map((m) => m.location).filter(Boolean)),
   ];
+
+  // La partie qui gère l'affichage des dates dans les champs de formulaire nécessite aussi d'être mise à jour
+  // Pour gérer correctement les timestamps
+  const formatDateForInput = (
+    dateValue: string | number | Date | undefined
+  ) => {
+    if (!dateValue) return "";
+
+    let date: Date;
+
+    // Si c'est un timestamp numérique (ou une chaîne représentant un nombre)
+    if (
+      typeof dateValue === "number" ||
+      (typeof dateValue === "string" && !isNaN(Number(dateValue)))
+    ) {
+      date = new Date(
+        typeof dateValue === "string" ? Number(dateValue) : dateValue
+      );
+    }
+    // Si c'est déjà une date
+    else if (dateValue instanceof Date) {
+      date = dateValue;
+    }
+    // Si c'est une chaîne ISO ou autre format de date
+    else {
+      date = new Date(dateValue);
+    }
+
+    // Vérifier si la date est valide
+    if (isNaN(date.getTime())) {
+      console.error(`Date invalide pour l'affichage: ${dateValue}`);
+      return "";
+    }
+
+    // Formater en YYYY-MM-DD pour le champ input type="date"
+    return date.toISOString().split("T")[0];
+  };
 
   return (
     <div className="animate-fade-in">
@@ -317,11 +436,7 @@ const MemberForm: React.FC<MemberFormProps> = ({
             <input
               type="date"
               name="startDate"
-              value={
-                typeof formData.startDate === "string"
-                  ? formData.startDate.split("T")[0]
-                  : ""
-              }
+              value={formatDateForInput(formData.startDate)}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
               required
@@ -333,11 +448,7 @@ const MemberForm: React.FC<MemberFormProps> = ({
             <input
               type="date"
               name="birthday"
-              value={
-                typeof formData.birthday === "string"
-                  ? formData.birthday.split("T")[0]
-                  : ""
-              }
+              value={formatDateForInput(formData.birthday)}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
               required
