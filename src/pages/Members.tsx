@@ -27,11 +27,8 @@ const Members: React.FC = () => {
   console.log(teamMembers);
 
   // Get unique departments for filter
-  const departments = [
-    ...new Set(
-      teamMembers.map((member) => member.department?.name).filter(Boolean)
-    ),
-  ];
+  const { departments } = useTeam();
+  const departmentNames = departments.map((dept) => dept.name);
 
   // Filter members based on search and department
   useEffect(() => {
@@ -155,8 +152,8 @@ const Members: React.FC = () => {
               {departments.map(
                 (department) =>
                   department && (
-                    <option key={department} value={department}>
-                      {department}
+                    <option key={department.id} value={department.name}>
+                      {department.name}
                     </option>
                   )
               )}
