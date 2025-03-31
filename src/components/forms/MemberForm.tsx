@@ -252,12 +252,8 @@ const MemberForm: React.FC<MemberFormProps> = ({
   const isEditing = !!memberId;
 
   // Get unique departments and locations for dropdowns
-  const departments = [
-    ...new Set(teamMembers.map((m) => m.department).filter(Boolean)),
-  ];
-  const locations = [
-    ...new Set(teamMembers.map((m) => m.location).filter(Boolean)),
-  ];
+  const { departments } = useTeam();
+  const { locations } = useTeam();
 
   // La partie qui gère l'affichage des dates dans les champs de formulaire nécessite aussi d'être mise à jour
   // Pour gérer correctement les timestamps
