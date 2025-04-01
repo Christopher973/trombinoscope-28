@@ -158,6 +158,9 @@ const CSVImportDialog = ({ children }: CSVImportDialogProps) => {
                     Optional columns: gender, managementCategory,
                     serviceAssignmentCode, departmentId, locationId, managerId
                   </li>
+                  <li className="font-medium text-primary-800">
+                    Both comma (,) and semicolon (;) are supported as separators
+                  </li>
                 </ul>
               </div>
             </>
