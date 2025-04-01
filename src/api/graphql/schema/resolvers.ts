@@ -23,13 +23,34 @@ export const resolvers = {
       const prismaData = transformDataForPrisma(data, false);
       return prisma.teamMember.create({ data: prismaData });
     },
-    updateTeamMember: (_, { id, data }) => {
+    updateTeamMember: async (_, { id, data }) => {
+      // Vérifier si un managerId est fourni et s'il existe
+      if (data.managerId) {
+        const managerExists = await prisma.teamMember.findUnique({
+          where: { id: data.managerId }
+        });
+        
+        if (!managerExists) {
+          throw new Error(`Manager avec l'ID ${data.managerId} n'existe pas`);
+        }
+      }
+
       // Transformation des données pour Prisma (true = mise à jour)
       const prismaData = transformDataForPrisma(data, true);
-      return prisma.teamMember.update({
+      
+      // Effectuer la mise à jour avec inclusion des relations
+      const updatedMember = await prisma.teamMember.update({
         where: { id },
         data: prismaData,
+        include: {
+          manager: true,
+          department: true,
+          location: true,
+          directReports: true
+        }
       });
+      
+      return updatedMember;
     },
     deleteTeamMember: (_, { id }) =>
       prisma.teamMember.delete({ where: { id } }),
@@ -44,6 +65,10 @@ export const resolvers = {
         const prismaData = transformDataForPrisma(member, false);
         const createdMember = await prisma.teamMember.create({
           data: prismaData,
+          include: {
+            department: true,
+            location: true
+          }
         });
         createdMembers.push(createdMember);
       }

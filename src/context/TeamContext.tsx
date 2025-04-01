@@ -127,36 +127,34 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({
       const lines = csvText.trim().split("\n");
       const headers = lines[0].split(",").map((h) => h.trim());
 
+      // Première étape: Créer un mapping temporaire entre email et membre
+      const emailToMemberMap = new Map();
       const members = [];
+      const managerRelations = []; // Stocke les relations manager-subordonné
 
       // Parcourir chaque ligne (sauf l'en-tête)
       for (let i = 1; i < lines.length; i++) {
         const line = lines[i].trim();
-        if (!line) continue; // Ignorer les lignes vides
+        if (!line) continue;
 
         const values = line.split(",").map((v) => v.trim());
-        const rawMember: any = {};
+        const rawMember = {};
 
-        // Associer les valeurs aux noms de colonnes
+        // Mapper les valeurs aux propriétés
         for (let j = 0; j < Math.min(headers.length, values.length); j++) {
           const key = headers[j];
           let value = values[j];
 
-          // Convertir les valeurs si nécessaire
-          if (
-            key === "departmentId" ||
-            key === "locationId" ||
-            key === "managerId"
-          ) {
+          // Convertir les valeurs numériques (sauf managerId qui sera géré séparément)
+          if (key === "departmentId" || key === "locationId") {
             value = value ? parseInt(value) : null;
           }
 
           rawMember[key] = value;
         }
 
-        // Créer un objet membre avec les noms de champs corrects
-        const member: any = {
-          // Mappings obligatoires
+        // Créer un membre sans managerId
+        const member = {
           firstname: rawMember.firstName || rawMember.firstname,
           lastname: rawMember.lastName || rawMember.lastname,
           professionnalEmail:
@@ -165,23 +163,36 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({
             rawMember.email,
           jobDescription: rawMember.jobDescription,
           managementCategory:
-            rawMember.managementCategory || "Individual Contributor", // Valeur par défaut
-          serviceAssignmentCode: rawMember.serviceAssignmentCode || `EMP-${i}`, // Valeur par défaut
-
-          // Mappings optionnels
+            rawMember.managementCategory || "Individual Contributor",
+          serviceAssignmentCode: rawMember.serviceAssignmentCode || `EMP-${i}`,
           gender: rawMember.gender,
           departmentId: rawMember.departmentId,
-          managerId: rawMember.managerId,
           locationId: rawMember.locationId,
-          photo: rawMember.imageUrl || rawMember.photo,
+          imageUrl: rawMember.imageUrl || rawMember.photo,
           birthday: rawMember.birthday || rawMember.birthDate,
           startDate:
             rawMember.startDate || new Date().toISOString().split("T")[0],
+          // Ne pas inclure managerId pour l'instant
         };
 
-        // Vérifier que les champs obligatoires sont présents
+        // Stocker la relation manager-subordonné pour traitement ultérieur
+        if (rawMember.managerEmail) {
+          managerRelations.push({
+            subordinateEmail: member.professionnalEmail,
+            managerEmail: rawMember.managerEmail,
+          });
+        } else if (rawMember.managerId) {
+          // Si c'est un ID numérique, le conserver pour mise à jour ultérieure
+          managerRelations.push({
+            subordinateEmail: member.professionnalEmail,
+            managerId: parseInt(rawMember.managerId),
+          });
+        }
+
+        // Vérifier les champs obligatoires
         if (member.firstname && member.lastname && member.professionnalEmail) {
           members.push(member);
+          emailToMemberMap.set(member.professionnalEmail, member);
         } else {
           console.warn(
             `Ligne ${i} ignorée : données obligatoires manquantes`,
@@ -190,9 +201,52 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({
         }
       }
 
-      // Si des membres ont été trouvés, les importer (et ATTENDRE que l'opération soit terminée)
-      if (members.length > 0) {
-        await importTeamMembers(members);
+      // Étape 1: Importer tous les membres sans relations hiérarchiques
+      const createdMembers = await importTeamMembers(members);
+
+      // Créer un mapping email -> ID pour les membres créés
+      const emailToIdMap = new Map();
+      createdMembers.forEach((member) => {
+        emailToIdMap.set(member.professionnalEmail, member.id);
+      });
+
+      // Étape 2: Mettre à jour les relations manager-subordonné
+      const updates = [];
+      for (const relation of managerRelations) {
+        const subordinateId = emailToIdMap.get(relation.subordinateEmail);
+        let managerId;
+
+        // Obtenir le managerId soit directement, soit via email
+        if (relation.managerEmail) {
+          managerId = emailToIdMap.get(relation.managerEmail);
+          console.log(
+            `Résolution de manager: ${relation.managerEmail} -> ${managerId}`
+          );
+        } else if (relation.managerId) {
+          managerId = relation.managerId;
+          console.log(`Utilisation de managerId direct: ${managerId}`);
+        }
+
+        // Vérifier que les IDs sont valides avant de mettre à jour
+        if (subordinateId && managerId) {
+          console.log(
+            `Mise à jour du membre ${subordinateId} avec le manager ${managerId}`
+          );
+          updates.push(updateTeamMember(subordinateId, { managerId }));
+        } else {
+          console.warn(
+            `Relation ignorée: subordonné=${relation.subordinateEmail} (ID=${subordinateId}), ` +
+              `manager=${
+                relation.managerEmail || relation.managerId
+              } (ID=${managerId})`
+          );
+        }
+      }
+
+      // Attendre que toutes les mises à jour soient terminées
+      if (updates.length > 0) {
+        await Promise.all(updates);
+        console.log(`${updates.length} relations managériales mises à jour`);
       }
 
       return { imported: members.length };
