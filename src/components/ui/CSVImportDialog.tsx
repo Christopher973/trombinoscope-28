@@ -155,8 +155,25 @@ const CSVImportDialog = ({ children }: CSVImportDialogProps) => {
                   </li>
                   <li>Dates should be in YYYY-MM-DD format</li>
                   <li>
-                    Optional columns: gender, managementCategory,
-                    serviceAssignmentCode, departmentId, locationId, managerId
+                    Department can be specified using:
+                    <ul className="list-disc pl-5">
+                      <li>departmentId (numeric): e.g. 2</li>
+                      <li>
+                        department or departmentName (text): e.g. "Technology"
+                      </li>
+                    </ul>
+                  </li>
+                  <li>
+                    Location can be specified using:
+                    <ul className="list-disc pl-5">
+                      <li>locationId (numeric): e.g. 3</li>
+                      <li>location or locationName (text): e.g. "Chicago"</li>
+                    </ul>
+                  </li>
+                  <li>
+                    Other optional columns: gender, phoneNumber,
+                    managementCategory, serviceAssignmentCode, managerId,
+                    managerEmail
                   </li>
                   <li className="font-medium text-primary-800">
                     Both comma (,) and semicolon (;) are supported as separators
