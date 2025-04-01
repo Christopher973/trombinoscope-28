@@ -141,6 +141,19 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({
       const members = [];
       const managerRelations = []; // Stocke les relations manager-subordonné
 
+      // Récupérer tous les départements et localisations pour la résolution des noms
+      const departmentsMap = new Map();
+      const locationsMap = new Map();
+
+      // Créer des maps nom -> id pour faciliter la recherche
+      departments.forEach((dept) => {
+        departmentsMap.set(dept.name.toLowerCase(), dept.id);
+      });
+
+      locations.forEach((loc) => {
+        locationsMap.set(loc.name.toLowerCase(), loc.id);
+      });
+
       // Parcourir chaque ligne (sauf l'en-tête)
       for (let i = 1; i < lines.length; i++) {
         const line = lines[i].trim();
@@ -196,14 +209,48 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({
             rawMember.managementCategory || "Individual Contributor",
           serviceAssignmentCode: rawMember.serviceAssignmentCode || `EMP-${i}`,
           gender: rawMember.gender,
-          departmentId: rawMember.departmentId,
-          locationId: rawMember.locationId,
+          departmentId: null,
+          locationId: null,
           imageUrl: rawMember.imageUrl || rawMember.photo,
           birthday: rawMember.birthday || rawMember.birthDate,
           startDate:
             rawMember.startDate || new Date().toISOString().split("T")[0],
           // Ne pas inclure managerId pour l'instant
         };
+
+        // Résolution du département (soit par ID soit par nom)
+        if (rawMember.departmentId) {
+          member.departmentId = parseInt(rawMember.departmentId);
+        } else if (rawMember.department || rawMember.departmentName) {
+          const deptName = (
+            rawMember.department || rawMember.departmentName
+          ).toLowerCase();
+          member.departmentId = departmentsMap.get(deptName) || null;
+          if (!member.departmentId) {
+            console.warn(
+              `Département non trouvé: ${
+                rawMember.department || rawMember.departmentName
+              }`
+            );
+          }
+        }
+
+        // Résolution de la localisation (soit par ID soit par nom)
+        if (rawMember.locationId) {
+          member.locationId = parseInt(rawMember.locationId);
+        } else if (rawMember.location || rawMember.locationName) {
+          const locName = (
+            rawMember.location || rawMember.locationName
+          ).toLowerCase();
+          member.locationId = locationsMap.get(locName) || null;
+          if (!member.locationId) {
+            console.warn(
+              `Localisation non trouvée: ${
+                rawMember.location || rawMember.locationName
+              }`
+            );
+          }
+        }
 
         // Stocker la relation manager-subordonné pour traitement ultérieur
         if (rawMember.managerEmail) {
@@ -227,6 +274,42 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({
           console.warn(
             `Ligne ${i} ignorée : données obligatoires manquantes`,
             rawMember
+          );
+        }
+
+        const notFoundDepartments = new Set();
+        const notFoundLocations = new Set();
+
+        members.forEach((member) => {
+          // Vérifier si des erreurs de résolution de département se sont produites
+          if (member._originalDepartmentName && !member.departmentId) {
+            notFoundDepartments.add(member._originalDepartmentName);
+          }
+
+          // Vérifier si des erreurs de résolution de localisation se sont produites
+          if (member._originalLocationName && !member.locationId) {
+            notFoundLocations.add(member._originalLocationName);
+          }
+
+          // Supprimer les champs temporaires avant l'envoi à l'API
+          delete member._originalDepartmentName;
+          delete member._originalLocationName;
+        });
+
+        // Afficher un avertissement si des départements ou localisations n'ont pas été trouvés
+        if (notFoundDepartments.size > 0) {
+          console.warn(
+            `Départements non trouvés: ${Array.from(notFoundDepartments).join(
+              ", "
+            )}`
+          );
+        }
+
+        if (notFoundLocations.size > 0) {
+          console.warn(
+            `Localisations non trouvées: ${Array.from(notFoundLocations).join(
+              ", "
+            )}`
           );
         }
       }
