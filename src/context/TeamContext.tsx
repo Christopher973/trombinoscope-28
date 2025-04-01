@@ -190,6 +190,7 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({
             rawMember.professionnalEmail ||
             rawMember.professionalemail ||
             rawMember.email,
+          phoneNumber: rawMember.phoneNumber,
           jobDescription: rawMember.jobDescription,
           managementCategory:
             rawMember.managementCategory || "Individual Contributor",

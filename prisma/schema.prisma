@@ -31,6 +31,7 @@ model TeamMember {
   firstname             String
   lastname              String
   professionnalEmail    String       @unique
+  phoneNumber           String?
   jobDescription        String
   managementCategory    String
   serviceAssignmentCode String
