@@ -123,9 +123,18 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const importTeamMembersFromCSV = async (csvText: string) => {
     try {
+      // Déterminer le séparateur (virgule ou point-virgule)
+      const firstLine = csvText.trim().split("\n")[0];
+      // Vérifier quel séparateur est le plus utilisé dans la première ligne
+      const commaCount = (firstLine.match(/,/g) || []).length;
+      const semicolonCount = (firstLine.match(/;/g) || []).length;
+      const separator = semicolonCount > commaCount ? ";" : ",";
+
+      console.log(`Séparateur CSV détecté: "${separator}"`);
+
       // Analyser le CSV
       const lines = csvText.trim().split("\n");
-      const headers = lines[0].split(",").map((h) => h.trim());
+      const headers = lines[0].split(separator).map((h) => h.trim());
 
       // Première étape: Créer un mapping temporaire entre email et membre
       const emailToMemberMap = new Map();
@@ -137,7 +146,27 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({
         const line = lines[i].trim();
         if (!line) continue;
 
-        const values = line.split(",").map((v) => v.trim());
+        const values = line.split(separator).map((v) => v.trim());
+
+        if (
+          values.length === 1 &&
+          line.includes(separator === "," ? ";" : ",")
+        ) {
+          // Cette ligne utilise probablement un séparateur différent de celui détecté
+          const alternateSeparator = separator === "," ? ";" : ",";
+          console.warn(
+            `Ligne ${i} utilise un séparateur différent (${alternateSeparator}), tentative de parsing alternatif...`
+          );
+          const alternativeValues = line
+            .split(alternateSeparator)
+            .map((v) => v.trim());
+          if (alternativeValues.length >= headers.length) {
+            // Si le parsing alternatif donne plus de colonnes, utilisez celui-ci
+            console.log(`Parsing alternatif réussi pour la ligne ${i}`);
+            values.splice(0, values.length, ...alternativeValues);
+          }
+        }
+
         const rawMember = {};
 
         // Mapper les valeurs aux propriétés
