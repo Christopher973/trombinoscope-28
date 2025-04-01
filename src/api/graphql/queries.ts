@@ -100,6 +100,12 @@ export const UPDATE_TEAM_MEMBER = gql`
   mutation UpdateTeamMember($id: Int!, $data: TeamMemberUpdateInput!) {
     updateTeamMember(id: $id, data: $data) {
       ...TeamMemberFields
+      manager {
+        id
+        firstname
+        lastname
+        professionnalEmail
+      }
     }
   }
   ${TEAM_MEMBER_FRAGMENT}
@@ -137,6 +143,7 @@ export const IMPORT_TEAM_MEMBERS = gql`
       id
       firstname
       lastname
+      professionnalEmail
     }
   }
 `;
