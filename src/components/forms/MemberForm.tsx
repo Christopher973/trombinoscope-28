@@ -367,7 +367,8 @@ const MemberForm: React.FC<MemberFormProps> = ({
             />
           </div>
 
-          <div>
+          {/* 
+            <div>
             <label className="block text-sm font-medium mb-1">
               Management Category
             </label>
@@ -376,7 +377,6 @@ const MemberForm: React.FC<MemberFormProps> = ({
               value={formData.managementCategory}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
-              required
             >
               <option value="">Select Category</option>
               <option value="Individual Contributor">
@@ -386,6 +386,7 @@ const MemberForm: React.FC<MemberFormProps> = ({
               <option value="Executive">Executive</option>
             </select>
           </div>
+          */}
 
           <div>
             <label className="block text-sm font-medium mb-1">Department</label>
@@ -439,6 +440,7 @@ const MemberForm: React.FC<MemberFormProps> = ({
             />
           </div>
 
+          {/* 
           <div>
             <label className="block text-sm font-medium mb-1">Birthday</label>
             <input
@@ -447,9 +449,9 @@ const MemberForm: React.FC<MemberFormProps> = ({
               value={formatDateForInput(formData.birthday)}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
-              required
             />
           </div>
+          */}
 
           <div>
             <label className="block text-sm font-medium mb-1">
