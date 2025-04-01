@@ -18,6 +18,7 @@ export interface TeamMember {
   firstname: string;
   lastname: string;
   gender?: string;
+  phoneNumber?: string;
   startDate: Date | string;
   birthday: Date | string;
   jobDescription: string;

@@ -28,6 +28,7 @@ const MemberForm: React.FC<MemberFormProps> = ({
     lastname: "",
     gender: "",
     professionnalEmail: "",
+    phoneNumber: "",
     jobDescription: "",
     managementCategory: "",
     serviceAssignmentCode: "",
@@ -205,6 +206,7 @@ const MemberForm: React.FC<MemberFormProps> = ({
       const cleanedData = {
         imageUrl: imageUrl,
         firstname: formData.firstname,
+        phoneNumber: formData.phoneNumber,
         lastname: formData.lastname,
         gender: formData.gender,
         professionnalEmail: formData.professionnalEmail,
@@ -335,6 +337,19 @@ const MemberForm: React.FC<MemberFormProps> = ({
               onChange={handleChange}
               className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
               required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Phone Number
+            </label>
+            <input
+              type="text"
+              name="phoneNumber"
+              value={formData.phoneNumber}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
 
