@@ -20,7 +20,13 @@ const OrgChartView: React.FC = () => {
   const [showControls, setShowControls] = useState<boolean>(true);
 
   // Get unique departments for filter
-  const departmentNames = departments.map((dept) => dept.name).sort();
+  // const departmentNames = departments.map((dept) => dept.name).sort();
+
+  const departmentNames = [
+    ...new Set(
+      teamMembers.map((member) => member.department?.name).filter(Boolean)
+    ),
+  ].sort();
 
   // Handle department selection/deselection
   const toggleDepartment = (department: string) => {

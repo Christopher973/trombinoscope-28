@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useTeam } from "@/context/TeamContext";
 import MemberCard from "@/components/ui/MemberCard";
@@ -7,14 +7,28 @@ import { User, GitBranchPlus, Plus } from "lucide-react";
 const Index = () => {
   const { teamMembers } = useTeam();
 
-  // Get just the top 6 members for featured display
-  const featuredMembers = teamMembers.slice(0, 6);
+  // Trier les membres par startDate décroissante (plus récente d'abord)
+  const featuredMembers = useMemo(() => {
+    // Créer une copie pour éviter de modifier l'original
+    return [...teamMembers]
+      .sort((a, b) => {
+        // Convertir les dates en objets Date si nécessaire
+        const dateA =
+          a.startDate instanceof Date ? a.startDate : new Date(a.startDate);
+        const dateB =
+          b.startDate instanceof Date ? b.startDate : new Date(b.startDate);
+
+        // Trier par ordre décroissant (plus récent d'abord)
+        return dateB.getTime() - dateA.getTime();
+      })
+      .slice(0, 12); // Prendre les 12 premiers après tri
+  }, [teamMembers]);
 
   return (
     <div className="page-container">
       {/* Hero section */}
       <section className="py-20 flex flex-col items-center text-center animate-fade-up">
-        <h1 className="text-4xl md:text-5xl font-bold mb-4">HeavenFlowChart</h1>
+        <h1 className="text-4xl md:text-5xl font-bold mb-4">Hiéraflow</h1>
         <p className="text-muted-foreground max-w-2xl mb-8">
           Simplifiez la gestion de votre équipe avec notre organigramme
           interactif. Affichez les hiérarchies d'équipe, les profils de membres
@@ -41,7 +55,7 @@ const Index = () => {
       {/* Featured members section */}
       <section className="py-12">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="section-heading">Derniers membres de l'équipe</h2>
+          <h2 className="section-heading">Derniers arrivants dans l'équipe</h2>
           <Link
             to="/members"
             className="text-primary hover:text-primary/80 transition-colors text-sm font-medium"

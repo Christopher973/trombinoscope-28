@@ -29,7 +29,7 @@ const Navbar: React.FC = () => {
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
             <Link to="/" className="text-xl font-semibold text-primary">
-              HeavenFlowChart
+              Hiéraflow
             </Link>
           </div>
 
