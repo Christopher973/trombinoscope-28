@@ -224,10 +224,14 @@ const Member: React.FC = () => {
                 <p className="text-sm text-muted-foreground">
                   Numéro de téléphone
                 </p>
-                <p>
+
+                <a
+                  href={`tel:${member.phoneNumber}`}
+                  className="text-primary hover:underline"
+                >
                   {member.phoneNumber ||
                     "Données non fournis, veuillez la saissir"}
-                </p>
+                </a>
               </div>
 
               <div>
