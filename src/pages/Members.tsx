@@ -15,7 +15,7 @@ import {
   PaginationEllipsis,
 } from "@/components/ui/pagination";
 
-const MEMBERS_PER_PAGE = 8; // Number of members to display per page
+const MEMBERS_PER_PAGE = 12; // Number of members to display per page
 
 const Members: React.FC = () => {
   const { teamMembers } = useTeam();
