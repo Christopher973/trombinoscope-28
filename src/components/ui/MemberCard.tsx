@@ -31,7 +31,7 @@ const MemberCard: React.FC<MemberCardProps> = ({
           to={`/members/${member.id}`}
           className="mt-2 text-xs text-primary underline hover:text-primary/80 transition-colors"
         >
-          View Profile
+          Voir détails
         </Link>
       </div>
     );

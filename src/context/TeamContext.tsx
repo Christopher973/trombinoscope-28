@@ -121,11 +121,12 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const importTeamMembersFromCSV = async (csvText: string) => {
+  const importTeamMembersFromCSV = async (
+    csvText: string
+  ): Promise<{ imported: number }> => {
     try {
       // Déterminer le séparateur (virgule ou point-virgule)
       const firstLine = csvText.trim().split("\n")[0];
-      // Vérifier quel séparateur est le plus utilisé dans la première ligne
       const commaCount = (firstLine.match(/,/g) || []).length;
       const semicolonCount = (firstLine.match(/;/g) || []).length;
       const separator = semicolonCount > commaCount ? ";" : ",";
@@ -134,18 +135,19 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({
 
       // Analyser le CSV
       const lines = csvText.trim().split("\n");
-      const headers = lines[0].split(separator).map((h) => h.trim());
+      const headers = lines[0]
+        .split(separator)
+        .map((h) => h.trim().toLowerCase());
 
-      // Première étape: Créer un mapping temporaire entre email et membre
-      const emailToMemberMap = new Map();
+      // Structures pour stocker les données et relations
       const members = [];
-      const managerRelations = []; // Stocke les relations manager-subordonné
+      const managerRelations = [];
 
-      // Récupérer tous les départements et localisations pour la résolution des noms
+      // Maps pour résolution des départements et locations
       const departmentsMap = new Map();
       const locationsMap = new Map();
 
-      // Créer des maps nom -> id pour faciliter la recherche
+      // Préparer les maps pour recherche
       departments.forEach((dept) => {
         departmentsMap.set(dept.name.toLowerCase(), dept.id);
       });
@@ -154,18 +156,18 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({
         locationsMap.set(loc.name.toLowerCase(), loc.id);
       });
 
-      // Parcourir chaque ligne (sauf l'en-tête)
+      // Traiter chaque ligne du CSV
       for (let i = 1; i < lines.length; i++) {
         const line = lines[i].trim();
         if (!line) continue;
 
         const values = line.split(separator).map((v) => v.trim());
 
+        // Vérifier si la ligne utilise un séparateur différent
         if (
           values.length === 1 &&
           line.includes(separator === "," ? ";" : ",")
         ) {
-          // Cette ligne utilise probablement un séparateur différent de celui détecté
           const alternateSeparator = separator === "," ? ";" : ",";
           console.warn(
             `Ligne ${i} utilise un séparateur différent (${alternateSeparator}), tentative de parsing alternatif...`
@@ -174,173 +176,143 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({
             .split(alternateSeparator)
             .map((v) => v.trim());
           if (alternativeValues.length >= headers.length) {
-            // Si le parsing alternatif donne plus de colonnes, utilisez celui-ci
-            console.log(`Parsing alternatif réussi pour la ligne ${i}`);
             values.splice(0, values.length, ...alternativeValues);
           }
         }
 
+        // Créer l'objet membre depuis les valeurs CSV
         const rawMember = {};
-
-        // Mapper les valeurs aux propriétés
         for (let j = 0; j < Math.min(headers.length, values.length); j++) {
-          const key = headers[j];
-          let value = values[j];
-
-          // Convertir les valeurs numériques (sauf managerId qui sera géré séparément)
-          if (key === "departmentId" || key === "locationId") {
-            value = value ? parseInt(value) : null;
-          }
-
-          rawMember[key] = value;
+          rawMember[headers[j]] = values[j];
         }
 
-        // Créer un membre sans managerId
+        // Créer un membre avec les champs requis
         const member = {
-          firstname: rawMember.firstName || rawMember.firstname,
-          lastname: rawMember.lastName || rawMember.lastname,
+          firstname: rawMember["firstname"] || rawMember["firstName"] || "",
+          lastname: rawMember["lastname"] || rawMember["lastName"] || "",
           professionnalEmail:
-            rawMember.professionnalEmail ||
-            rawMember.professionalemail ||
-            rawMember.email,
-          phoneNumber: rawMember.phoneNumber,
-          jobDescription: rawMember.jobDescription,
+            rawMember["professionnalemail"] || rawMember["email"] || "",
+          phoneNumber: rawMember["phonenumber"] || "",
+          jobDescription: rawMember["jobdescription"] || rawMember["job"] || "",
           managementCategory:
-            rawMember.managementCategory || "Individual Contributor",
-          serviceAssignmentCode: rawMember.serviceAssignmentCode || `EMP-${i}`,
-          gender: rawMember.gender,
+            rawMember["managementcategory"] || "Individual Contributor",
+          serviceAssignmentCode:
+            rawMember["serviceassignmentcode"] || `EMP-${i}`,
+          gender: rawMember["gender"] || "",
           departmentId: null,
           locationId: null,
-          imageUrl: rawMember.imageUrl || rawMember.photo,
-          birthday: rawMember.birthday || rawMember.birthDate,
+          imageUrl: rawMember["imageurl"] || rawMember["photo"] || "",
+          birthday: rawMember["birthday"] || rawMember["birthdate"] || null,
           startDate:
-            rawMember.startDate || new Date().toISOString().split("T")[0],
-          // Ne pas inclure managerId pour l'instant
+            rawMember["startdate"] || new Date().toISOString().split("T")[0],
         };
 
-        // Résolution du département (soit par ID soit par nom)
-        if (rawMember.departmentId) {
-          member.departmentId = parseInt(rawMember.departmentId);
-        } else if (rawMember.department || rawMember.departmentName) {
+        // Résolution du département
+        if (rawMember["departmentid"]) {
+          member.departmentId = parseInt(rawMember["departmentid"]);
+        } else if (rawMember["department"] || rawMember["departmentname"]) {
           const deptName = (
-            rawMember.department || rawMember.departmentName
+            rawMember["department"] || rawMember["departmentname"]
           ).toLowerCase();
           member.departmentId = departmentsMap.get(deptName) || null;
-          if (!member.departmentId) {
-            console.warn(
-              `Département non trouvé: ${
-                rawMember.department || rawMember.departmentName
-              }`
-            );
-          }
         }
 
-        // Résolution de la localisation (soit par ID soit par nom)
-        if (rawMember.locationId) {
-          member.locationId = parseInt(rawMember.locationId);
-        } else if (rawMember.location || rawMember.locationName) {
+        // Résolution de la localisation
+        if (rawMember["locationid"]) {
+          member.locationId = parseInt(rawMember["locationid"]);
+        } else if (rawMember["location"] || rawMember["locationname"]) {
           const locName = (
-            rawMember.location || rawMember.locationName
+            rawMember["location"] || rawMember["locationname"]
           ).toLowerCase();
           member.locationId = locationsMap.get(locName) || null;
-          if (!member.locationId) {
-            console.warn(
-              `Localisation non trouvée: ${
-                rawMember.location || rawMember.locationName
-              }`
-            );
-          }
         }
 
-        // Stocker la relation manager-subordonné pour traitement ultérieur
-        if (rawMember.managerEmail) {
+        // Stocker la relation manager si présente
+        if (rawMember["managerserviceassignmentcode"]) {
           managerRelations.push({
-            subordinateEmail: member.professionnalEmail,
-            managerEmail: rawMember.managerEmail,
+            serviceAssignmentCode: member.serviceAssignmentCode,
+            managerServiceAssignmentCode:
+              rawMember["managerserviceassignmentcode"],
+            email: member.professionnalEmail, // Pour le débogage
           });
-        } else if (rawMember.managerId) {
-          // Si c'est un ID numérique, le conserver pour mise à jour ultérieure
-          managerRelations.push({
-            subordinateEmail: member.professionnalEmail,
-            managerId: parseInt(rawMember.managerId),
-          });
+
+          console.log(
+            `Relation détectée: ${member.serviceAssignmentCode} a pour manager ${rawMember["managerserviceassignmentcode"]}`
+          );
         }
 
         // Vérifier les champs obligatoires
         if (member.firstname && member.lastname && member.professionnalEmail) {
           members.push(member);
-          emailToMemberMap.set(member.professionnalEmail, member);
         } else {
           console.warn(
-            `Ligne ${i} ignorée : données obligatoires manquantes`,
+            `Ligne ${i} ignorée: données obligatoires manquantes`,
             rawMember
-          );
-        }
-
-        const notFoundDepartments = new Set();
-        const notFoundLocations = new Set();
-
-        members.forEach((member) => {
-          // Vérifier si des erreurs de résolution de département se sont produites
-          if (member._originalDepartmentName && !member.departmentId) {
-            notFoundDepartments.add(member._originalDepartmentName);
-          }
-
-          // Vérifier si des erreurs de résolution de localisation se sont produites
-          if (member._originalLocationName && !member.locationId) {
-            notFoundLocations.add(member._originalLocationName);
-          }
-
-          // Supprimer les champs temporaires avant l'envoi à l'API
-          delete member._originalDepartmentName;
-          delete member._originalLocationName;
-        });
-
-        // Afficher un avertissement si des départements ou localisations n'ont pas été trouvés
-        if (notFoundDepartments.size > 0) {
-          console.warn(
-            `Départements non trouvés: ${Array.from(notFoundDepartments).join(
-              ", "
-            )}`
-          );
-        }
-
-        if (notFoundLocations.size > 0) {
-          console.warn(
-            `Localisations non trouvées: ${Array.from(notFoundLocations).join(
-              ", "
-            )}`
           );
         }
       }
 
-      // Étape 1: Importer tous les membres sans relations hiérarchiques
+      // Importer tous les membres
+      console.log(`Importation de ${members.length} membres...`);
       const createdMembers = await importTeamMembers(members);
+      console.log(`${createdMembers.length} membres importés avec succès`);
 
-      // Créer un mapping email -> ID pour les membres créés
-      const emailToIdMap = new Map();
-      createdMembers.forEach((member) => {
-        emailToIdMap.set(member.professionnalEmail, member.id);
+      // Attendre 1 seconde pour s'assurer que la base de données est à jour
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Rafraîchir les données pour récupérer tous les membres, y compris ceux importés
+      console.log("Récupération de tous les membres...");
+      const { data: refreshedData } = await refetchMembers();
+      const allMembers = refreshedData?.teamMembers || [];
+
+      console.log(
+        `${allMembers.length} membres trouvés après rafraîchissement`
+      );
+
+      // Créer un mapping code d'assignation -> id pour tous les membres
+      const serviceCodeMap = new Map();
+      allMembers.forEach((member) => {
+        if (member.serviceAssignmentCode) {
+          // Normaliser le code pour éviter les problèmes de casse ou d'espaces
+          const normalizedCode = String(member.serviceAssignmentCode).trim();
+          serviceCodeMap.set(normalizedCode, member.id);
+          // Aussi stocker sans aucune espace pour être plus tolérant
+          serviceCodeMap.set(normalizedCode.replace(/\s+/g, ""), member.id);
+        }
       });
 
-      // Étape 2: Mettre à jour les relations manager-subordonné
+      console.log(
+        `Codes d'assignation disponibles: ${Array.from(
+          serviceCodeMap.keys()
+        ).join(", ")}`
+      );
+
+      // Mettre à jour les relations manager-subordonné
       const updates = [];
+
       for (const relation of managerRelations) {
-        const subordinateId = emailToIdMap.get(relation.subordinateEmail);
-        let managerId;
+        // Normaliser les codes pour la recherche
+        const subordinateCode = String(relation.serviceAssignmentCode).trim();
+        const managerCode = String(
+          relation.managerServiceAssignmentCode
+        ).trim();
 
-        // Obtenir le managerId soit directement, soit via email
-        if (relation.managerEmail) {
-          managerId = emailToIdMap.get(relation.managerEmail);
-          console.log(
-            `Résolution de manager: ${relation.managerEmail} -> ${managerId}`
+        // Trouver les IDs
+        let subordinateId = serviceCodeMap.get(subordinateCode);
+        let managerId = serviceCodeMap.get(managerCode);
+
+        // Si les codes exacts ne sont pas trouvés, essayer sans espaces
+        if (!subordinateId)
+          subordinateId = serviceCodeMap.get(
+            subordinateCode.replace(/\s+/g, "")
           );
-        } else if (relation.managerId) {
-          managerId = relation.managerId;
-          console.log(`Utilisation de managerId direct: ${managerId}`);
-        }
+        if (!managerId)
+          managerId = serviceCodeMap.get(managerCode.replace(/\s+/g, ""));
 
-        // Vérifier que les IDs sont valides avant de mettre à jour
+        console.log(
+          `Résolution de relation: ${subordinateCode} (ID=${subordinateId}) -> Manager ${managerCode} (ID=${managerId})`
+        );
+
         if (subordinateId && managerId) {
           console.log(
             `Mise à jour du membre ${subordinateId} avec le manager ${managerId}`
@@ -348,24 +320,27 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({
           updates.push(updateTeamMember(subordinateId, { managerId }));
         } else {
           console.warn(
-            `Relation ignorée: subordonné=${relation.subordinateEmail} (ID=${subordinateId}), ` +
-              `manager=${
-                relation.managerEmail || relation.managerId
-              } (ID=${managerId})`
+            `Relation ignorée: subordonné=${relation.email} (code=${subordinateCode}, ID=${subordinateId}), ` +
+              `manager=${managerCode} (ID=${managerId})`
           );
         }
       }
 
-      // Attendre que toutes les mises à jour soient terminées
+      // Appliquer toutes les mises à jour
       if (updates.length > 0) {
         await Promise.all(updates);
         console.log(`${updates.length} relations managériales mises à jour`);
       }
 
+      // Rafraîchir une dernière fois pour avoir la structure complète
+      await refetchMembers();
+
       return { imported: members.length };
     } catch (error) {
-      console.error("Error parsing CSV:", error);
-      throw new Error("Failed to parse CSV file. Please check the format.");
+      console.error("Erreur lors de l'importation CSV:", error);
+      throw new Error(
+        "Échec de l'analyse du fichier CSV. Veuillez vérifier le format."
+      );
     }
   };
 

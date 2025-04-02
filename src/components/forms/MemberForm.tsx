@@ -201,7 +201,7 @@ const MemberForm: React.FC<MemberFormProps> = ({
       const birthday = formatDateForSubmit(formData.birthday);
       const startDate = formatDateForSubmit(formData.startDate);
 
-      console.log("Dates formatées:", { birthday, startDate });
+      // console.log("Dates formatées:", { birthday, startDate });
 
       const cleanedData = {
         imageUrl: imageUrl,
@@ -297,38 +297,44 @@ const MemberForm: React.FC<MemberFormProps> = ({
   return (
     <div className="animate-fade-in">
       <h2 className="text-xl font-semibold mb-4">
-        {isEditing ? "Edit Team Member" : "Add New Team Member"}
+        {isEditing
+          ? "Modifier le Membre de l'équipe"
+          : "Ajouter un Nouveau Membre de l'Équipe"}
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium mb-1">First Name</label>
+            <label className="block text-sm font-medium mb-1">Prénom</label>
             <input
               type="text"
               name="firstname"
               value={formData.firstname}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium mb-1">Last Name</label>
-            <input
-              type="text"
-              name="lastname"
-              value={formData.lastname}
-              onChange={handleChange}
-              className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+              placeholder="John"
               required
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium mb-1">
-              Professional Email
+              Nom de famille
+            </label>
+            <input
+              type="text"
+              name="lastname"
+              value={formData.lastname}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+              placeholder="Doe"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Email professionnel
             </label>
             <input
               type="email"
@@ -336,32 +342,34 @@ const MemberForm: React.FC<MemberFormProps> = ({
               value={formData.professionnalEmail}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+              placeholder="compagny@email.com"
               required
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium mb-1">
-              Phone Number
+              Numéro de téléphone
             </label>
             <input
               type="text"
               name="phoneNumber"
               value={formData.phoneNumber}
               onChange={handleChange}
+              placeholder="0612034839"
               className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Gender</label>
+            <label className="block text-sm font-medium mb-1">Genre</label>
             <select
               name="gender"
               value={formData.gender || ""}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
             >
-              <option value="">Select Gender</option>
+              <option value="">Sélectionnez un genre</option>
               <option value="Male">Male</option>
               <option value="Female">Female</option>
               <option value="Other">Other</option>
@@ -370,7 +378,7 @@ const MemberForm: React.FC<MemberFormProps> = ({
 
           <div>
             <label className="block text-sm font-medium mb-1">
-              Job Description
+              Poste occupé
             </label>
             <input
               type="text"
@@ -378,6 +386,7 @@ const MemberForm: React.FC<MemberFormProps> = ({
               value={formData.jobDescription}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+              placeholder="Individual Worker"
               required
             />
           </div>
@@ -404,14 +413,15 @@ const MemberForm: React.FC<MemberFormProps> = ({
           */}
 
           <div>
-            <label className="block text-sm font-medium mb-1">Department</label>
+            <label className="block text-sm font-medium mb-1">Direction</label>
             <select
               name="departmentId"
               value={formData.departmentId || ""}
               onChange={handleDepartmentChange}
               className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+              required
             >
-              <option value="">Select Department</option>
+              <option value="">Sélectionnez une direction</option>
               {departments.map(
                 (dept) =>
                   dept && (
@@ -424,14 +434,17 @@ const MemberForm: React.FC<MemberFormProps> = ({
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Location</label>
+            <label className="block text-sm font-medium mb-1">
+              Localisation
+            </label>
             <select
               name="locationId"
               value={formData.locationId || ""}
               onChange={handleLocationChange}
               className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+              required
             >
-              <option value="">Select Location</option>
+              <option value="">Sélectionnez une localisation</option>
               {locations.map(
                 (loc) =>
                   loc && (
@@ -444,7 +457,9 @@ const MemberForm: React.FC<MemberFormProps> = ({
           </div>
 
           <div>
-            <label className="block text-sm font-medium mb-1">Start Date</label>
+            <label className="block text-sm font-medium mb-1">
+              Date d'entrée
+            </label>
             <input
               type="date"
               name="startDate"
@@ -455,7 +470,7 @@ const MemberForm: React.FC<MemberFormProps> = ({
             />
           </div>
 
-          {/* 
+          {/* Birthday field is optional, so we can keep it commented out for now
           <div>
             <label className="block text-sm font-medium mb-1">Birthday</label>
             <input
@@ -470,7 +485,7 @@ const MemberForm: React.FC<MemberFormProps> = ({
 
           <div>
             <label className="block text-sm font-medium mb-1">
-              Service Assignment Code
+              Matricule Agent
             </label>
             <input
               type="text"
@@ -478,6 +493,7 @@ const MemberForm: React.FC<MemberFormProps> = ({
               value={formData.serviceAssignmentCode}
               onChange={handleChange}
               className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+              placeholder="12345"
               required
             />
           </div>
@@ -485,7 +501,7 @@ const MemberForm: React.FC<MemberFormProps> = ({
 
         <div>
           <label className="block text-sm font-medium mb-1">
-            Profile Image URL
+            Image de profile
           </label>
           <div className="flex items-center gap-4">
             <div className="w-24 h-24 border border-border rounded-md overflow-hidden">
@@ -525,7 +541,7 @@ const MemberForm: React.FC<MemberFormProps> = ({
             onChange={handleManagerChange}
             className="w-full px-3 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
           >
-            <option value="">No Manager (Top Level)</option>
+            <option value="">Aucun manager (Top Level)</option>
             {teamMembers
               .filter((m) => m.id !== memberId) // Can't be your own manager
               .map((manager) => (
