@@ -174,7 +174,7 @@ const CSVImportDialog = ({ children }: CSVImportDialogProps) => {
                   </li>
                   <li>
                     Autres colonnes facultatives: gender, phoneNumber,
-                    managerEmail
+                    managerServiceAssignmentCode
                   </li>
                   <li className="font-medium text-primary-800">
                     Les virgules (,) et les points-virgules (;) sont pris en
