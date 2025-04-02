@@ -36,8 +36,8 @@ const CSVImportDialog = ({ children }: CSVImportDialogProps) => {
         !selectedFile.name.endsWith(".csv")
       ) {
         toast({
-          title: "Invalid file format",
-          description: "Please select a CSV file",
+          title: "Format fichier invalide",
+          description: "Veuillez sélectionner un fichier CSV",
           variant: "destructive",
         });
         if (fileInputRef.current) fileInputRef.current.value = "";
@@ -51,8 +51,8 @@ const CSVImportDialog = ({ children }: CSVImportDialogProps) => {
   const handleImport = async () => {
     if (!file) {
       toast({
-        title: "No file selected",
-        description: "Please select a CSV file to import",
+        title: "Aucun fichier sélectionné",
+        description: "Veuillez sélectionner un fichier CSV à importer",
         variant: "destructive",
       });
       return;
@@ -99,17 +99,19 @@ const CSVImportDialog = ({ children }: CSVImportDialogProps) => {
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Import Team Members from CSV</DialogTitle>
+          <DialogTitle>
+            Importer des membres de l'équipe à partir de CSV
+          </DialogTitle>
           <DialogDescription>
-            Upload a CSV file containing team member data. The file should have
-            columns for firstname, lastname, jobDescription, etc.
+            Téléchargez un fichier CSV contenant les données des membres de
+            l'équipe.
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col space-y-4 py-4">
           {importStatus === "success" ? (
             <div className="flex flex-col items-center justify-center space-y-2 p-4 text-center">
               <CheckCircle2 className="h-12 w-12 text-green-500" />
-              <p className="text-lg font-medium">Import successful!</p>
+              <p className="text-lg font-medium">Importer avec succès!</p>
             </div>
           ) : (
             <>
@@ -120,10 +122,10 @@ const CSVImportDialog = ({ children }: CSVImportDialogProps) => {
                 >
                   <Upload className="h-8 w-8 text-gray-400" />
                   <span className="mt-2 block text-sm font-medium text-gray-700">
-                    {file ? file.name : "Select a CSV file"}
+                    {file ? file.name : "Sélectionnez un fichier CSV"}
                   </span>
                   <span className="mt-1 block text-xs text-gray-500">
-                    CSV files only, max 10MB
+                    fichiers CSV uniquement, max 10MB
                   </span>
                   <Input
                     id="csvFile"
@@ -140,43 +142,43 @@ const CSVImportDialog = ({ children }: CSVImportDialogProps) => {
                 <div className="flex items-center rounded-md bg-red-50 p-3 text-red-800">
                   <AlertCircle className="h-5 w-5 mr-2" />
                   <span className="text-sm">
-                    There was an error processing your file. Please check the
-                    format and try again.
+                    Il y a eu une erreur dans le traitement de votre fichier.
+                    Veuillez vérifier le formatez et réessayez.
                   </span>
                 </div>
               )}
 
               <div className="text-xs text-gray-500">
-                <p className="font-medium mb-1">CSV Format Requirements:</p>
+                <p className="font-medium mb-1">Format CSV Exigences :</p>
                 <ul className="list-disc pl-5 space-y-1">
                   <li>
-                    Required columns: firstname, lastname, professionnalEmail,
-                    jobDescription, startDate, birthday
+                    Colonnes requises: firstname, lastname, professionnalEmail,
+                    jobDescription, serviceAssignmentCode, department, location
                   </li>
-                  <li>Dates should be in YYYY-MM-DD format</li>
+                  <li>Les dates doivent être au format YYYY-MM-DD</li>
                   <li>
-                    Department can be specified using:
+                    Le département peut être spécifié en utilisant:
                     <ul className="list-disc pl-5">
-                      <li>departmentId (numeric): e.g. 2</li>
+                      {/* <li>departmentId (numeric): e.g. 2</li> */}
                       <li>
-                        department or departmentName (text): e.g. "Technology"
+                        department ou departmentName (text): ex : "Technology"
                       </li>
                     </ul>
                   </li>
                   <li>
-                    Location can be specified using:
+                    Location peut être spécifié en utilisant :
                     <ul className="list-disc pl-5">
-                      <li>locationId (numeric): e.g. 3</li>
-                      <li>location or locationName (text): e.g. "Chicago"</li>
+                      {/* <li>locationId (numeric): e.g. 3</li> */}
+                      <li>location ou locationName (text): ex : "Chicago"</li>
                     </ul>
                   </li>
                   <li>
-                    Other optional columns: gender, phoneNumber,
-                    managementCategory, serviceAssignmentCode, managerId,
+                    Autres colonnes facultatives: gender, phoneNumber,
                     managerEmail
                   </li>
                   <li className="font-medium text-primary-800">
-                    Both comma (,) and semicolon (;) are supported as separators
+                    Les virgules (,) et les points-virgules (;) sont pris en
+                    charge comme séparateurs
                   </li>
                 </ul>
               </div>
@@ -191,14 +193,14 @@ const CSVImportDialog = ({ children }: CSVImportDialogProps) => {
                 onClick={resetFileInput}
                 disabled={!file || isLoading}
               >
-                Reset
+                réinitialiser
               </Button>
               <Button
                 onClick={handleImport}
                 disabled={!file || isLoading}
                 className="ml-auto"
               >
-                {isLoading ? "Importing..." : "Import Members"}
+                {isLoading ? "Importation..." : "Importer des Membres"}
               </Button>
             </>
           )}

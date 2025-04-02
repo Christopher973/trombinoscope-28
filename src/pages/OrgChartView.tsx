@@ -49,11 +49,11 @@ const OrgChartView: React.FC = () => {
       <div className="mb-8 text-center">
         <h1 className="text-2xl md:text-3xl font-semibold mb-2 animate-fade-up">
           <GitBranchPlus className="inline-block mr-2 h-6 w-6" />
-          Organization Chart
+          Organigramme de l'équipe
         </h1>
         <p className="text-muted-foreground max-w-2xl mx-auto animate-fade-up">
-          Explore your team's structure and relationships. Select multiple
-          departments to compare teams.
+          Explorez la structure et les relations de votre équipe. Sélectionnez
+          multiple départements pour comparer les équipes.
         </p>
       </div>
 
@@ -61,7 +61,7 @@ const OrgChartView: React.FC = () => {
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
           <div className="font-medium flex items-center">
             <Filter className="h-4 w-4 mr-2" />
-            <span>Filter Departments:</span>
+            <span>Filtrer les Départements :</span>
           </div>
 
           {selectedDepartments.length > 0 && (
@@ -72,7 +72,7 @@ const OrgChartView: React.FC = () => {
               className="text-xs flex items-center gap-1"
             >
               <X className="h-3 w-3" />
-              Clear All
+              Effacer Tout
             </Button>
           )}
         </div>

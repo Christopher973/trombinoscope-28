@@ -37,7 +37,7 @@ const Member: React.FC = () => {
             className="inline-flex items-center text-muted-foreground hover:text-foreground transition-colors"
           >
             <ChevronLeft className="h-4 w-4 mr-1" />
-            Back to Members
+            Retour aux Membres
           </Link>
         </div>
 
@@ -57,16 +57,16 @@ const Member: React.FC = () => {
   if (!member) {
     return (
       <div className="page-container text-center py-12">
-        <h2 className="text-2xl font-semibold mb-4">Member Not Found</h2>
+        <h2 className="text-2xl font-semibold mb-4">Membre Non Trouvé</h2>
         <p className="text-muted-foreground mb-6">
-          The team member you're looking for doesn't exist.
+          Le membre de l'équipe que vous recherchez n'existe pas.
         </p>
         <Link
           to="/members"
           className="inline-flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
         >
           <ChevronLeft className="h-4 w-4 mr-2" />
-          Back to Members
+          Retour aux Membres
         </Link>
       </div>
     );
@@ -93,7 +93,7 @@ const Member: React.FC = () => {
             className="inline-flex items-center text-muted-foreground hover:text-foreground transition-colors"
           >
             <ChevronLeft className="h-4 w-4 mr-1" />
-            Back to Profile
+            Retour au Profil
           </button>
         </div>
 
@@ -116,7 +116,7 @@ const Member: React.FC = () => {
           className="inline-flex items-center text-muted-foreground hover:text-foreground transition-colors"
         >
           <ChevronLeft className="h-4 w-4 mr-1" />
-          Back to Members
+          Retour aux Membres
         </Link>
       </div>
 
@@ -164,8 +164,8 @@ const Member: React.FC = () => {
                   <div className="flex items-center">
                     <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
                     <span className="text-sm">
-                      Joined{" "}
-                      {new Date(Number(member.birthday)).toLocaleDateString()}
+                      Date d'entrée :{" "}
+                      {new Date(Number(member.startDate)).toLocaleDateString()}
                     </span>
                   </div>
                 )}
@@ -182,7 +182,7 @@ const Member: React.FC = () => {
                   className="flex-1 py-2 px-3 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors flex items-center justify-center"
                 >
                   <Pencil className="h-4 w-4 mr-2" />
-                  Edit
+                  Modifier
                 </button>
 
                 <button
@@ -201,40 +201,48 @@ const Member: React.FC = () => {
           {/* Additional info section */}
           <div className="glassmorphism rounded-xl p-6 animate-fade-up">
             <h2 className="text-lg font-semibold mb-3">
-              Additional Information
+              Informations Supplémentaires
             </h2>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {member.gender && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Gender</p>
-                  <p>{member.gender}</p>
-                </div>
-              )}
+              <div>
+                <p className="text-sm text-muted-foreground">Genre</p>
+                <p>
+                  {member.gender || "Données non fournis, veuillez la saissir"}
+                </p>
+              </div>
 
-              {member.birthday && (
-                <div>
-                  <p className="text-sm text-muted-foreground">Birthday</p>
-                  {/* <p>{new Date(member.birthday).toLocaleDateString()}</p> */}
-                  {/* <p>{member.birthday}</p> */}
-                  <p>
-                    {new Date(Number(member.birthday)).toLocaleDateString()}
-                  </p>
-                </div>
-              )}
+              {/* <div>
+                <p className="text-sm text-muted-foreground">
+                  Date de naissance
+                </p>
+                {new Date(Number(member.birthday)).toLocaleDateString() ||
+                  "Données non fournis, veuillez la saissir"}
+              </div> */}
 
+              <div>
+                <p className="text-sm text-muted-foreground">
+                  Numéro de téléphone
+                </p>
+                <p>
+                  {member.phoneNumber ||
+                    "Données non fournis, veuillez la saissir"}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-sm text-muted-foreground">Matricule Agent</p>
+                <p>{member.serviceAssignmentCode}</p>
+              </div>
+
+              {/*  Management Category NOT USED
               <div>
                 <p className="text-sm text-muted-foreground">
                   Management Category
                 </p>
                 <p>{member.managementCategory}</p>
               </div>
-
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  Service Assignment Code
-                </p>
-                <p>{member.serviceAssignmentCode}</p>
-              </div>
+              */}
             </div>
           </div>
 
@@ -256,7 +264,7 @@ const Member: React.FC = () => {
               style={{ animationDelay: "300ms" }}
             >
               <h2 className="text-lg font-semibold mb-3">
-                Direct Reports ({directReports.length})
+                Subordonnées ({directReports.length})
               </h2>
               <div className="space-y-3">
                 {directReports.map((report) => (
@@ -280,7 +288,9 @@ const Member: React.FC = () => {
               <div className="bg-destructive/10 p-2 rounded-full mr-3">
                 <AlertTriangle className="h-6 w-6 text-destructive" />
               </div>
-              <h3 className="text-lg font-semibold">Confirm Deletion</h3>
+              <h3 className="text-lg font-semibold">
+                Confirmer la Suppression
+              </h3>
               <button
                 onClick={() => setIsConfirmingDelete(false)}
                 className="ml-auto text-muted-foreground hover:text-foreground"
@@ -290,21 +300,22 @@ const Member: React.FC = () => {
             </div>
 
             <p className="mb-4">
-              Are you sure you want to delete{" "}
+              Êtes-vous sûr de vouloir supprimer{" "}
               <strong>
                 {member.firstname} {member.lastname}
               </strong>
-              ? This action cannot be undone.
+              ? Cette action ne peut être annulée.
             </p>
 
             {directReports.length > 0 && (
               <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-md text-sm">
-                <p className="text-amber-800 font-medium mb-1">Warning</p>
+                <p className="text-amber-800 font-medium mb-1">Avertissement</p>
                 <p className="text-amber-700">
-                  This member has {directReports.length} direct report
-                  {directReports.length !== 1 && "s"}. Their direct reports will
-                  be reassigned to{" "}
-                  {member.managerId ? "this member's manager" : "no manager"}.
+                  This member has {directReports.length} rapport direct
+                  {directReports.length !== 1 && "s"}. Leurs rapports directs
+                  seront être réaffecté à{" "}
+                  {member.managerId ? "this member's manager" : "aucun manager"}
+                  .
                 </p>
               </div>
             )}
@@ -314,14 +325,14 @@ const Member: React.FC = () => {
                 onClick={() => setIsConfirmingDelete(false)}
                 className="px-4 py-2 border border-border rounded-md hover:bg-secondary transition-colors"
               >
-                Cancel
+                Annuler
               </button>
 
               <button
                 onClick={handleDelete}
                 className="px-4 py-2 bg-destructive text-white rounded-md hover:bg-destructive/90 transition-colors"
               >
-                Delete
+                Supprimer
               </button>
             </div>
           </div>

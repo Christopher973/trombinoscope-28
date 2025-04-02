@@ -205,9 +205,8 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({
             rawMember.email,
           phoneNumber: rawMember.phoneNumber,
           jobDescription: rawMember.jobDescription,
-          managementCategory:
-            rawMember.managementCategory || "Individual Contributor",
-          serviceAssignmentCode: rawMember.serviceAssignmentCode || `EMP-${i}`,
+          managementCategory: rawMember.managementCategory || "",
+          serviceAssignmentCode: rawMember.serviceAssignmentCode,
           gender: rawMember.gender,
           departmentId: null,
           locationId: null,
@@ -215,7 +214,6 @@ export const TeamProvider: React.FC<{ children: React.ReactNode }> = ({
           birthday: rawMember.birthday || rawMember.birthDate,
           startDate:
             rawMember.startDate || new Date().toISOString().split("T")[0],
-          // Ne pas inclure managerId pour l'instant
         };
 
         // Résolution du département (soit par ID soit par nom)

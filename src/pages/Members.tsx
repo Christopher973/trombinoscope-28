@@ -24,7 +24,7 @@ const Members: React.FC = () => {
   const [filteredMembers, setFilteredMembers] = useState(teamMembers);
   const [currentPage, setCurrentPage] = useState(1);
 
-  console.log(teamMembers);
+  // console.log(teamMembers);
 
   // Get unique departments for filter
   const { departments } = useTeam();
@@ -109,7 +109,7 @@ const Members: React.FC = () => {
   return (
     <div className="page-container">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-        <h1 className="text-2xl font-semibold">Team Members</h1>
+        <h1 className="text-2xl font-semibold">Membres de l'équipe</h1>
         <div className="flex flex-col sm:flex-row gap-2">
           <CSVImportDialog>
             <Button variant="outline" className="flex items-center gap-2">
@@ -123,7 +123,7 @@ const Members: React.FC = () => {
             className="inline-flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
           >
             <PlusCircle className="h-4 w-4 mr-2" />
-            Add New Member
+            Ajouter un Nouveau Membre
           </Link>
         </div>
       </div>
@@ -134,7 +134,7 @@ const Members: React.FC = () => {
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Search members..."
+              placeholder="Rechercher des membres par leurs noms et prénoms..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-9 pr-4 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
@@ -148,7 +148,7 @@ const Members: React.FC = () => {
               onChange={(e) => setDepartmentFilter(e.target.value)}
               className="w-full appearance-none pl-9 pr-8 py-2 border border-border rounded-md focus:outline-none focus:ring-1 focus:ring-primary bg-white"
             >
-              <option value="">All Departments</option>
+              <option value="">Tous les départements</option>
               {departments.map(
                 (department) =>
                   department && (

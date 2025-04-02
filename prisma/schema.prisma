@@ -27,25 +27,36 @@ model Location {
 }
 
 model TeamMember {
+  // Identification
   id                    Int          @id @default(autoincrement())
+  serviceAssignmentCode String       @unique
+
+  // Information
   firstname             String
   lastname              String
   professionnalEmail    String       @unique
   phoneNumber           String?
+  imageUrl              String?
+  birthday              DateTime?
+
+  // RH Information
   jobDescription        String
-  managementCategory    String
-  serviceAssignmentCode String
-  gender                String?
-  departmentId          Int?
-  department            Department?  @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+  startDate             DateTime
+  managementCategory    String      
+  gender                String?      @default("Non défini")
+
+
+  // Relation to other models
   managerId             Int?
   manager               TeamMember?  @relation("ManagerToTeamMember", fields: [managerId], references: [id], onDelete: SetNull)
   directReports         TeamMember[] @relation("ManagerToTeamMember")
+
+  departmentId          Int?
+  department            Department?  @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+
   locationId            Int?
   location              Location?    @relation(fields: [locationId], references: [id], onDelete: SetNull)
-  imageUrl              String?
-  startDate             DateTime
-  birthday              DateTime?
+
   createdAt             DateTime     @default(now())
   updatedAt             DateTime     @updatedAt
 
